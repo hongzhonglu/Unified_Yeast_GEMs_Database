@@ -446,7 +446,7 @@ def getRXNmetaboliteMapping(rxn0, met0):
     input, for example rxn0=['r1','g2']
     gpr0=['a => c','a => b']
     output, each rxn related with each gene'''
-    met_annotation = pd.read_excel('/Users/luho/PycharmProjects/model/cobrapy/result/met_yeastGEM.xlsx')
+    met_annotation = pd.read_excel('../data/met_yeastGEM.xlsx')
     s1 = rxn0
     s2 = met0
     s3 = splitAndCombine(s2,s1,sep0=" ")
