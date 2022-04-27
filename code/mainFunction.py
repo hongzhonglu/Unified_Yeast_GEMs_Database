@@ -726,3 +726,19 @@ def find(rxn_name_list, specific_string, equal=False):
     return index
 
 
+def sampling_to_test(fileDir, tarDir, sample_ratio):
+    '''sample a part number of the ssGEMs for building analysing pipeline
+    fileDir: path to the files storage dict
+    tarDir: path to the samples storage dict
+    sample_ratio: haw many samples used to test
+    usage: sampling_to_test(fileDir='result/ssGEMs/',tarDir='result/test/ssGEMs/',sample_ratio=0.1)
+    '''
+    import os, random, shutil
+    pathDir = os.listdir(fileDir)
+    filenumber = len(pathDir)
+    picknumber = int(filenumber * sample_ratio)
+    sample = random.sample(pathDir, picknumber)
+    print(sample)
+    for name in sample:
+        shutil.copy(fileDir + name, tarDir + name)
+    return
