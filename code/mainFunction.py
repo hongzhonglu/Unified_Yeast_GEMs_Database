@@ -446,7 +446,7 @@ def getRXNmetaboliteMapping(rxn0, met0):
     input, for example rxn0=['r1','g2']
     gpr0=['a => c','a => b']
     output, each rxn related with each gene'''
-    met_annotation = pd.read_excel('/Users/luho/PycharmProjects/model/cobrapy/result/met_yeastGEM.xlsx')
+    met_annotation = pd.read_excel('../data/met_yeastGEM.xlsx')
     s1 = rxn0
     s2 = met0
     s3 = splitAndCombine(s2,s1,sep0=" ")
@@ -726,3 +726,340 @@ def find(rxn_name_list, specific_string, equal=False):
     return index
 
 
+def sampling_to_test(fileDir, tarDir, sample_ratio):
+    '''sample a part number of the ssGEMs for building analysing pipeline
+    fileDir: path to the files storage dict
+    tarDir: path to the samples storage dict
+    sample_ratio: haw many samples used to test
+    usage: sampling_to_test(fileDir='result/ssGEMs/',tarDir='result/test/ssGEMs/',sample_ratio=0.1)
+    '''
+    import os, random, shutil
+    pathDir = os.listdir(fileDir)
+    filenumber = len(pathDir)
+    picknumber = int(filenumber * sample_ratio)
+    sample = random.sample(pathDir, picknumber)
+    print(sample)
+    for name in sample:
+        shutil.copy(fileDir + name, tarDir + name)
+    return
+
+
+def anaerobicsimulation(model):
+    '''Note that the reaction coefficients can't be directly changed to 0 by present code,so the function need
+    some parameters tuning for specific yeast model
+    reference:https://github.com/SysBioChalmers/yeast-GEM/blob/main/code/otherChanges/anaerobicModel.m'''
+    # 切换anaerobic growth medium
+    from cobra.io import read_sbml_model
+    import os
+    import pandas as pd
+
+    anerobic_model = model.copy()
+
+    # 1. change: Refit GAM and NGAM to exp. data, change biomass composition
+    GAM=30.49
+    P=0.461     #change protein fraction——unfinished
+    NGAM=0
+    NGAM_id = 'r_4046'
+    GAM_id = 'r_4041'
+    anerobic_model.reactions.get_by_id(NGAM_id).bounds = NGAM,NGAM
+    biomass_rxn=anerobic_model.reactions.get_by_id('r_4041')
+    biomass_rxn.add_metabolites({anerobic_model.metabolites.get_by_id('s_0434[c]'): 55.4 - 30.49,
+                             anerobic_model.metabolites.get_by_id('s_0803[c]'): 55.4 - 30.49,
+                             anerobic_model.metabolites.get_by_id('s_0394[c]'): -55.4 + 30.49,
+                             anerobic_model.metabolites.get_by_id('s_0794[c]'): -55.4 + 30.49,
+                             anerobic_model.metabolites.get_by_id('s_1322[c]'): -55.4 + 30.49})
+
+    # 2. Removes the requirement of heme a, NAD(PH), coenzyme A in the biomass equation
+    cofactor_rxn = anerobic_model.reactions.get_by_id('r_4598')
+    # yeastGEM8.5 co-factors reaction coeffiecients
+    # cofactor_rxn.add_metabolites({anerobic_model.metabolites.get_by_id('s_3714[c]'):9.99999997475243e-07,
+    #                                 anerobic_model.metabolites.get_by_id('s_1198[c]'):0.00264999992214143,
+    #                                 anerobic_model.metabolites.get_by_id('s_1203[c]'):0.000150000007124618 ,
+    #                                 anerobic_model.metabolites.get_by_id('s_1207[c]'):0.000569999974686652,
+    #                                 anerobic_model.metabolites.get_by_id('s_1212[c]'):0.00270000007003546,
+    #                                 anerobic_model.metabolites.get_by_id('s_0529[c]'):0.000190000006114133 })
+
+    # panYeast co-factors reaction coefficients
+    cofactor_rxn.add_metabolites({anerobic_model.metabolites.get_by_id('s_3714[c]'): 9.99999997475243e-07,
+                                  anerobic_model.metabolites.get_by_id('s_1198[c]'): 0.00100000004749745,
+                                  anerobic_model.metabolites.get_by_id('s_1203[c]'): 0.000788461999036372,
+                                  anerobic_model.metabolites.get_by_id('s_1207[c]'): 6.54000032227486e-05,
+                                  anerobic_model.metabolites.get_by_id('s_1212[c]'): 7.6900003477931e-05,
+                                  anerobic_model.metabolites.get_by_id('s_0529[c]'): 0.000190000006114133})
+
+    # 3. change: Changes media to anaerobic————no O2；add sterol and fatty acid exchanges
+    change_modium = anerobic_model.medium
+    change_modium['r_1992'] = 0
+    # 改变培养基成分，允许甾醇和脂肪酸的交换反应
+    change_modium_lists = ['r_1757', 'r_1915', 'r_1994', 'r_2106', 'r_2134', 'r_2137', 'r_2189']
+    for met in change_modium_lists:
+        change_modium[met] = 1000.0
+    anerobic_model.medium = change_modium
+        # print(test_model.reactions.get_by_id(met).bounds)
+
+    # 4. Blocked pathways for proper glycerol production.
+    # Block oxaloacetate-malate shuttle (not present in anaerobic conditions)
+    anerobic_model.reactions.get_by_id('r_0713').lower_bound = 0    #Mithocondria
+    anerobic_model.reactions.get_by_id('r_0714').lower_bound = 0    #Cytoplasm
+    # Block glycerol dehydroginase (only acts in microaerobic conditions)
+    anerobic_model.reactions.get_by_id('r_0487').upper_bound=0
+    # Block 2-oxoglutarate + L-glutamine -> 2 L-glutamate (alternative pathway)
+    anerobic_model.reactions.get_by_id('r_0472').upper_bound = 0
+
+    return anerobic_model
+
+
+def scale_biomass(model,component,new_value,balance_out):
+    '''Scales the biomass composition
+    model: metabolic model in COBRA format
+    component: name of the component to rescale (e.g. "protein")——
+        'carbohydrate', 'protein', 'lipid', 'RNA', 'DNA', 'ion', 'cofactor'
+    new_value: new total fraction for target component
+    balance_out: if chosen, the name of another component with which the model will be balanced out so that
+                    the total mass remains = 1 g/gDW——
+        'carbohydrate', 'protein', 'lipid', 'RNA', 'DNA', 'ion', 'cofactor'
+    disp_output: if output from sumBioMass should be displayed (default = true)
+
+    Usage: model = scale_biomass(model,component,new_value,balance_out,dispOutput)
+    original_values get from SysBioChalmers/yeast-GEM repo:
+    P -> 0.46 g/gDW
+    C -> 0.38067 g/gDW
+    R -> 0.061 g/gDW
+    D -> 0.0037021 g/gDW
+    L -> 0.087299 g/gDW
+    I -> 0.0024815 g/gDW
+    F -> 0.0048478 g/gDW
+    X -> 1 gDW/gDW
+    Growth = 0.083748 1/h
+    reference:https://github.com/SysBioChalmers/yeast-GEM/blob/main/code/otherChanges/scaleBioMass.m
+    '''
+
+    P=0.46
+    C=0.38
+    R=0.061
+    D=0.0037
+    L=0.0873
+    I=0.00248
+    F=0.00485
+    content_Cap = [C, P, L, R, D, I, F]
+    content_all = ['carbohydrate', 'protein', 'lipid', 'RNA', 'DNA', 'ion', 'cofactor']
+    for i in range(len(content_all)):
+        if content_all[i]==component:
+            pos=i
+
+    if pos:
+        old_value=content_Cap[pos]
+        f = new_value / old_value
+        model=rescale_pseudorxn(model,component,f)
+        if balance_out in content_all:
+            for i in range(len(content_all)):
+                if content_all[i] == component:
+                    pos = i
+            balance_value=content_Cap[pos]
+            f=(balance_value - (new_value - old_value)) / balance_value
+            model = rescale_pseudorxn(model, balance_out, f)
+        else:
+            print('input balance_out argument is wrong!╯︿╰')
+    else:
+        print('input component argument is wrong!╯︿╰')
+
+    return model
+
+
+def rescale_pseudorxn(model,met_name,f):
+    '''Rescales a specific pseudoreaction by a given value
+    model: the YeastGEM
+    met_name: name of the component to rescale(eg. 'protein')
+    f: fraction to use for rescaling
+
+    usage: model=scaleBioMass(model,met_name,f)'''
+
+    if met_name=='lipid':
+        model = rescale_pseudorxn(model, 'lipid backbone', f)
+        model = rescale_pseudorxn(model, 'lipid chain', f)
+    else:
+        rxn_name=met_name+' pseudoreaction'
+        for reaction in model.reactions:
+            if reaction.name==rxn_name:
+                target_pseudorxn=reaction
+                break
+
+        for met,old_value in target_pseudorxn.metabolites.items():
+            if old_value!=1:
+                change=f-1
+                target_pseudorxn.add_metabolites({met: old_value * change})
+
+        return model
+
+
+def check_strain_info(ssGEM_id):
+    '''strain_id:the strain you are interested in.
+    usage: info=check_info('AAA')/check_info('AAA.xml')
+    '''
+    import pandas as pd
+    ssGEM_id=ssGEM_id.strip('.xml')
+    all_strains_info=pd.read_excel('data/1897_strains_info.xlsx')
+    strain_info=all_strains_info[all_strains_info['ssGEM']==ssGEM_id]
+    if not len(strain_info):
+        print("can't find %s"%ssGEM_id)
+    return strain_info
+
+
+def make_blast_db(seq, folder, db_type='prot'):
+    '''construct blast database.
+    *parameters:
+    seq: query sequence used to build blast_db
+    in_folder:path to query sequence
+    out_folder: the path used to store db file
+    db_type: 'prot'——protein sequence； or 'nucl' ——nucleotide sequence
+    diamond_path:path to run diamond
+    *example：
+    make_blast_db(ref_id, folder='~/why/S.cerevisiae_ssGEMs_auto-construction/data/strain_genome_diamond_db', db_type='prot',diamond_path='~/why')
+    '''
+    import os
+    from glob import glob
+
+    # out_file = '%s/%s.dmnd' % (out_folder, seq)
+    # files = glob('%s/*.dmnd' % out_folder)
+
+    out_file = '%s.fa.pin'%seq
+    files = os.listdir(folder)
+
+    if out_file in files:
+        print(seq, 'already has a blast db')
+        return
+    if db_type == 'nucl':
+        ext = 'fna'
+    else:
+        ext = 'fa'
+
+    # cmd_line = '%s/./diamond makedb --in %s/%s -d %s/%s.dmnd'%(diamond_path,in_folder, seq,out_folder,seq)   #diamond命令
+    cmd_line = 'makeblastdb -in %s/%s.%s -dbtype %s ' % (folder,seq,ext, db_type)                  #ncbi blast命令
+    print('making blast db with following command line...')
+    print(cmd_line)
+    os.system(cmd_line)
+
+
+def trans_genome(strain,out_folder,in_folder):
+    '''translate genome cds sequence into protein sequence'''
+    import os
+    from Bio import SeqIO
+    in_file='%s/%s.fa'%(in_folder,strain)
+    out_file='%s/%s.fa'%(out_folder,strain)
+    all_strain=os.listdir(in_folder)
+    print(all_strain)
+    strain_name=strain+'.fa'
+    if strain_name in all_strain:
+        print('translating %s'%strain)
+    else:
+        print('can not find %s'%strain)
+        print(in_file)
+        return
+    records=SeqIO.parse(in_file,'fasta')
+
+    with open(out_file,'w') as output:
+        for record in records:
+            seq=record.seq.translate()
+            seqid=record.id
+            output.write('>%s\n%s\n'%(seqid,seq))
+    return
+
+
+# define a function to run BLASTp
+def run_blastp(seq, db, in_folder='prots', out_folder='bbh', out=None, outfmt=6, evalue=0.001, threads=1):
+    import os
+    from glob import glob
+    if out == None:
+        out = '%s/%s_vs_%s.txt' % (out_folder, seq, db)
+        print(out)
+
+    files = glob('%s/*.txt' % out_folder)
+    if out in files:
+        print(seq, 'already blasted')
+        return
+
+    print('blasting %s vs %s' % (seq, db))
+
+    db = '%s/%s.fa' % (in_folder, db)
+    seq = '%s/%s.fa' % (in_folder, seq)
+    cmd_line = 'blastp -db %s -query %s -out %s -evalue %s -outfmt %s -num_threads %i' \
+               % (db, seq, out, evalue, outfmt, threads)
+
+    print('running blastp with following command line...')
+    print(cmd_line)
+    os.system(cmd_line)
+    return out
+
+
+# define a function to get sequence length
+def get_gene_lens(query, in_folder='test/build_geneMatrix/all_cds'):
+    from Bio import SeqIO
+    file = '%s/%s.fa' % (in_folder, query)
+    handle = open(file)
+    records = SeqIO.parse(handle, "fasta")
+    out = []
+
+    for record in records:
+        out.append({'gene': record.name, 'gene_length': len(record.seq)})
+
+    out = pd.DataFrame(out)
+    return out
+
+
+# define a function to get Bi-Directional BLASTp Best Hits
+def get_bbh(query, subject, in_folder='bbh'):
+    from glob import glob
+
+    out_file = '%s\\%s_vs_%s_parsed.csv' % (in_folder, query, subject)
+    files = glob('%s\\*_parsed.csv' % in_folder)
+    if out_file in files:
+        print('%s has already done the bbh'%query)
+        return
+    else:
+        # Utilize the defined protein BLAST function
+        run_blastp(query, subject,in_folder='test/build_geneMatrix/blast_db',out_folder=in_folder)
+        run_blastp(subject, query,in_folder='test/build_geneMatrix/blast_db',out_folder=in_folder)
+
+        query_lengths = get_gene_lens(query, in_folder='test/build_geneMatrix/blast_db')
+        subject_lengths = get_gene_lens(subject, in_folder='test/build_geneMatrix/blast_db')
+
+        # Define the output file of this BLAST
+
+
+        # Combine the results of the protein BLAST into a dataframe
+        print('parsing BBHs for', query, subject)
+        cols = ['gene', 'subject', 'PID', 'alnLength', 'mismatchCount', 'gapOpenCount', 'queryStart', 'queryEnd',
+                'subjectStart', 'subjectEnd', 'eVal', 'bitScore']
+        bbh = pd.read_csv('%s/%s_vs_%s.txt' % (in_folder, query, subject), sep='\t', names=cols)
+        bbh = pd.merge(bbh, query_lengths)
+        bbh['COV'] = bbh['alnLength'] / bbh['gene_length']
+
+        bbh2 = pd.read_csv('%s/%s_vs_%s.txt' % (in_folder, subject, query), sep='\t', names=cols)
+        bbh2 = pd.merge(bbh2, subject_lengths)
+        bbh2['COV'] = bbh2['alnLength'] / bbh2['gene_length']
+        out = pd.DataFrame()
+
+        # Filter the genes based on coverage
+        bbh = bbh[bbh.COV >= 0.4]
+        bbh2 = bbh2[bbh2.COV >= 0.4]
+
+        # Delineate the best hits from the BLAST
+        for g in bbh.gene.unique():
+            res = bbh[bbh.gene == g]
+            if len(res) == 0:
+                continue
+            best_hit = res.loc[res.PID.idxmax()]
+            best_gene = best_hit.subject
+            res2 = bbh2[bbh2.gene == best_gene]
+            if len(res2) == 0:
+                continue
+            best_hit2 = res2.loc[res2.PID.idxmax()]
+            best_gene2 = best_hit2.subject
+            if g == best_gene2:
+                best_hit['BBH'] = '<=>'
+            else:
+                best_hit['BBH'] = '->'
+            out = pd.concat([out, pd.DataFrame(best_hit).transpose()])
+
+        # Save the final file to a designated CSV file
+        out.to_csv(out_file)
