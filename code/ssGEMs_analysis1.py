@@ -10,6 +10,7 @@ import re
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+import scipy.stats as stats
 
 from mainFunction import *
 
@@ -93,9 +94,29 @@ lg1392_ssGEM_result['rxn_numb'].describe()
 lg1392_ssGEM_result['gene_numb'].describe()
 new600_ssGEM_result['rxn_numb'].describe()
 new600_ssGEM_result['gene_numb'].describe()
+# compare ssGEMs gene number
+fig_new_gene_numb=sns.kdeplot(new600_ssGEM_result['gene_numb'],shade=True)
+fig_lg_gene_numb=sns.kdeplot(lg1392_ssGEM_result['gene_numb'],shade=True)
+fig_na1011_gene_numb=sns.kdeplot(na1011_ssGEM_result['gene_numb'],shade=True)
+plt.legend(loc='upper left',labels=['new_strains','lg1392_strains','nature1011_strains'],title='strains from different annotation processes')
+plt.title('Numbers of genes in ssGEMs from different genome annotation results')
+plt.show()
 
+# compare ssGEMs rxn number
+fig_new_rxn_numb=sns.kdeplot(new600_ssGEM_result['rxn_numb'],shade=True)
+fig_lg_rxn_numb=sns.kdeplot(lg1392_ssGEM_result['rxn_numb'],shade=True)
+fig_na1011_rxn_numb=sns.kdeplot(na1011_ssGEM_result['rxn_numb'],shade=True)
+plt.legend(loc='upper left',labels=['new_strains','lg1392_strains','nature1011_strains'],title='strains from different annotation processes')
+plt.title('Numbers of rxn in ssGEMs from different genome annotation results ')
+plt.show()
 
+# evaluate difference in ssGEMs size between new600 and lg1392
+rxn_numb_t_stat, rxn_numb_p_val = stats.ttest_ind(new600_ssGEM_result['rxn_numb'], lg1392_ssGEM_result['rxn_numb'], equal_var=False)
+gene_numb_t_stat,gene_numb_p_val=stats.ttest_ind(new600_ssGEM_result['gene_numb'], lg1392_ssGEM_result['gene_numb'], equal_var=False)
+rxn_numb_p_val
+gene_numb_p_val
 
+#
 ungrowable_strains=lg1392_ssGEM_result[(~(lg1392_ssGEM_result['aerobic growth']>0))&(~(ungrowable_strains['anaerobic_growth']>0))]
 ungrowable_strainslist=ungrowable_strains.ssGEM_id.tolist()
 ungrowable_strains_info=pd.DataFrame()
@@ -108,9 +129,12 @@ lg_allstrain_classify=allstrain_info[(allstrain_info['source']=='1011_nature')
                                      |(allstrain_info['source']=='lg_others')]['type'].value_counts()
 lg_ungrowable_strain_classify=ungrowable_strains_info['type'].value_counts()
 
+new600_strain_classify=allstrain_info[(allstrain_info['source']!='1011_nature')
+                                      &(allstrain_info['source']!='lg_others')]['type'].value_counts()
 
-lg_allstrain_classify.plot.pie()
+lg_allstrain_classify.plot.pie(colors=['r','b','g','c','m'],)
 lg_ungrowable_strain_classify.plot.pie()
+new600_strain_classify.plot.pie(colors=['b','r','g','c','m'])
 plt.show()
 
 
@@ -120,6 +144,14 @@ new600_ssGEM_result['anaerobic_growth']=new600_ssGEM_result['anaerobic_growth'].
 new600_ssGEM_result['aerobic growth'].value_counts()
 new600_ssGEM_result['anaerobic_growth'].value_counts()
 
-len(new600_ssGEM_result[new600_ssGEM_result['anaerobic_growth']>0])
-len(new600_ssGEM_result[new600_ssGEM_result['aerobic growth']>0])
-len(lg1392_ssGEM_result[lg1392_ssGEM_result['anaerobic_growth']>0])
+new600_ungrowable_strainlist=list(new600_ssGEM_result[new600_ssGEM_result['anaerobic_growth']>0]['ssGEM_id'])
+new600_ungrowable_strains_info=pd.DataFrame()
+for strain in new600_ungrowable_strainlist:
+    strain_info = allstrain_info[allstrain_info['ssGEM'] == strain]
+    new600_ungrowable_strains_info = pd.concat([new600_ungrowable_strains_info, strain_info], axis=0, join='outer', ignore_index=True)
+new600_ungrowable_strains_calassify=new600_ungrowable_strains_info['type'].value_counts()
+new600_ungrowable_strains_calassify.plot.pie(colors=['b','r','g','c','m'])
+plt.show()
+
+
+# strain classification
