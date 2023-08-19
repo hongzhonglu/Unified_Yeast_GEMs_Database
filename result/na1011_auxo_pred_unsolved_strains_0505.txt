@@ -1,2 +1,0 @@
-the strainlist that can't grow on minimal medium and minimal medium+20 AAs:53/1011
-AAG.xml,ABM.xml,AHB.xml,AHL.xml,AHM.xml,AHR.xml,AID.xml,AIE.xml,ALI.xml,AQA.xml,AQD.xml,ATQ.xml,AVB.xml,BCB.xml,BCC.xml,BCD.xml,BCE.xml,BCF.xml,BCG.xml,BCH.xml,BCI.xml,BCK.xml,BCL.xml,BCN.xml,BCP.xml,BCQ.xml,BDP.xml,BDQ.xml,BDR.xml,BDS.xml,BDT.xml,BDV.xml,BEA.xml,BEB.xml,BEC.xml,BED.xml,BEE.xml,BMR.xml,BMV.xml,BNA.xml,BNB.xml,BNC.xml,BND.xml,BRK.xml,CDT.xml,CGD.xml,CGE.xml,CPG.xml,CQS.xml,SACE_YAE.xml,SACE_YBQ.xml,SACE_YBR.xml,SACE_YDM.xml,
