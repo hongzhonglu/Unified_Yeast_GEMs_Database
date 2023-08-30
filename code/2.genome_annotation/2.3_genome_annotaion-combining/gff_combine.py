@@ -5,7 +5,7 @@ import os
 import numpy as np
 import sys
 sys.path.append("code/genome_annotaion-combining")
-from 2.combine_gene_prediction import load_genes,genePreds
+# from 2.combine_gene_prediction import load_genes,genePreds
 
 lift_gff_dir = 'data/genome/predicted_allcds/flo_gff_result/'
 lift_prot_dir = 'data/genome/predicted_allcds/flo_proteomes/'
