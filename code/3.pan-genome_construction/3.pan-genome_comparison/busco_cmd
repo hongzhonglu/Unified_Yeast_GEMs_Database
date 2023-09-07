@@ -1,0 +1,24 @@
+# download busco(mamba is a faster choice to replace conda)
+conda create -n busco -c bioconda -c conda-forge busco
+
+# download saccharomycetes_odb10.2020-08-05.tar.gz from https://busco-data.ezlab.org/v5/data/lineages/
+wget https://busco-data.ezlab.org/v5/data/lineages/saccharomycetes_odb10.2020-08-05.tar.gz
+tar -zxvf saccharomycetes_odb10.2020-08-05.tar.gz
+
+#busco running
+# lgpan:
+busco -m prot -i data/genome/lg_pangenome.fasta -l /dssg/home/acct-clslhz/clslhz/why_ssGEM/data/busco/database/saccharomycetes_odb10 -o ../data/busco/result/lgpangenome --offline &
+
+# nature1011 pangenome:
+busco -m prot -i data/genome/pan1011_v1.fasta -l /dssg/home/acct-clslhz/clslhz/why_ssGEM/data/busco/database/saccharomycetes_odb10 -o ../data/busco/result/na1011_pangenome --offline &
+
+# pan1800_v2_50_70
+busco -m prot -i data/genome/pan1800_50_70_v2.fasta -l /dssg/home/acct-clslhz/clslhz/why_ssGEM/data/busco/database/saccharomycetes_odb10 -o ../data/busco/result/pan1800_v2 --offline &
+
+# copy output files
+mkdir ../data/busco/summary
+cp ../data/busco/result/lgpangenome/short_summary.specific.saccharomycetes_odb10.lgpangenome.txt ../data/busco/summary/lgpangenome.txt
+cp ../data/busco/result/na1011_pangenome/short_summary.specific.saccharomycetes_odb10.na1011_pangenome.txt ../data/busco/summary/na1011_pangenome.txt
+cp ../data/busco/result/pan1800_v2/short_summary.specific.saccharomycetes_odb10.pan1800_v2.txt ../data/busco/summary/pan1800_v2.txt
+
+
