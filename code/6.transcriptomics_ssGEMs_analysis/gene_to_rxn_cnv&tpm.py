@@ -23,7 +23,8 @@ def gene_to_rxn_calculator(gene_dataMatrix,rxn):
 
     # if there is no and in gpr, then the copy number is the max of related genes
     if 'and' not in gpr:
-        rxn_data=rxn_gene_dataMatrix.max(axis=0)
+        # rxn_data=rxn_gene_dataMatrix.max(axis=0) # max for OR
+        rxn_data=rxn_gene_dataMatrix.sum(axis=0)   # sum for OR
     # if there is no or in gpr, then the copy number is the min of related genes
     elif 'or' not in gpr:
         rxn_data=rxn_gene_dataMatrix.min(axis=0)
@@ -43,12 +44,13 @@ def gene_to_rxn_calculator(gene_dataMatrix,rxn):
             geneIDlist=[geneID.strip() for geneID in geneIDlist]
             complex_data=rxn_gene_dataMatrix.loc[rxn_gene_dataMatrix.index.isin(geneIDlist),:].min(axis=0)
             df_complexes_dataMatrix=pd.concat([df_complexes_dataMatrix,complex_data],axis=1)
-        rxn_data=df_complexes_dataMatrix.max(axis=1)
+        # rxn_data=df_complexes_dataMatrix.max(axis=1)
+        rxn_data=df_complexes_dataMatrix.sum(axis=1)
     return rxn_data
 
 
 # load panModel
-panYeast=read_sbml_model('model/panYeast_v4_5.xml')
+panYeast=read_sbml_model('model/panYeast.xml')
 
 
 # get rxn_cnvMatrix for each strain according to geneMatrix and GPR rules
@@ -66,11 +68,11 @@ df_rxn_cnvMatrix=df_rxn_cnvMatrix.T
 df_rxn_cnvMatrix.fillna(0,inplace=True)
 
 # save rxn_cnvMatrix
-df_rxn_cnvMatrix.to_csv('code/6.anaerobic_growth_analysis/output/sce1800_rxn_cnvMatrix.csv')
+df_rxn_cnvMatrix.to_csv('code/6.transcriptomics_ssGEMs_analysis/output/sce1800_rxn_cnvMatrix.csv')
 
 # get rxn_tpmMatrix for each strain according to geneMatrix and GPR rules
 # load tpm data
-tpmMatrix=pd.read_csv('code/7.transcriptomics_ssGEMs_analysis/output/sce969_transcriptome_tpmMatrix.csv',index_col=0)
+tpmMatrix=pd.read_csv('code/6.transcriptomics_ssGEMs_analysis/output/sce969_transcriptome_countMatrix_normalized.csv',index_col=0)
 # calculate rxn_tpmMatrix
 df_rxn_tpmMatrix=pd.DataFrame(index=tpmMatrix.columns)
 for rxn in panYeast.reactions:
@@ -83,7 +85,7 @@ df_rxn_tpmMatrix=df_rxn_tpmMatrix.T
 df_rxn_tpmMatrix.fillna(0,inplace=True)
 
 # save rxn_tpmMatrix
-df_rxn_tpmMatrix.to_csv('code/6.anaerobic_growth_analysis/output/sce969_rxn_tpmMatrix.csv')
+df_rxn_tpmMatrix.to_csv('code/6.transcriptomics_ssGEMs_analysis/output/sce969_rxn_expressionMatrix_normalized.csv')
 
 
 

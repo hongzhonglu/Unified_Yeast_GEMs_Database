@@ -172,7 +172,7 @@ def set_SCmedium(model):
                 'r_4594': 1000, # Cu(2+) exchange
                 'r_4600': 1000, # Ca(2+) exchange
                 'r_2020': 1000,# potassium exchange
-                'r_1714': 1    # glucose exchange
+                'r_1714': 20    # glucose exchange
                     }
     # add 20 ammino acids
     ammino_acids={'r_1810':0.01,

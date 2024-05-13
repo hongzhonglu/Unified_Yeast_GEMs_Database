@@ -1,0 +1,35 @@
+# mmseqs2
+# download database
+# show download available databases
+mmseqs databases
+# down load database
+mmseqs databases NR database/ncbi_nr tmp_nr
+mmseqs databases UniRef50 database/uniref50 tmp_uniref50
+mmseqs databases UniProtKB/Swiss-Prot database/swissprot tmp
+# download taxonomy data
+wget https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz
+mkdir taxonomy && tar -xxvf taxdump.tar.gz -C taxonomy
+
+
+
+# customized blastp command
+mmseqs createdb query.fasta queryDB
+mmseqs search queryDB database/ncbi_nr resultDB tmp --max-seqs 250 --min-seq-id 0.8 --format-output "query,target,pident,bits,qcov,tcov,qlen,tlen,evalue,taxid,taxname,taxlineage"
+mmseqs convertalis queryDB database/ncbi_nr resultDB resultDB.m8
+
+
+# diamond convert BLAST database
+# download taxon mapping file
+wget https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid/prot.accession2taxid.FULL.gz
+# download taxonnodes file
+wget https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdmp.zip
+# unzip those files
+unzip taxdmp.zip
+# decompress the raxon mapping file
+gunzip prot.accession2taxid.FULL.gz
+# make diamond database
+diamond makedb --in database/nr -d database/nr --taxonmap database/prot.accession2taxid.FULL --taxonnodes database/nodes.dmp --taxonnames database/names.dmp
+#run blastp
+diamond blastp -d database/nr -q query.fasta -o result.txt --max-target-seqs 250 --min-identity 80 --outfmt 6 qseqid sseqid pident bitscore qcovhsp scovhsp qlen slen evalue staxids sscinames sphylums
+
+

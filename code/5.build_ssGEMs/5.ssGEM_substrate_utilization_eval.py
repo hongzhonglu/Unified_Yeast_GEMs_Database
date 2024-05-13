@@ -14,9 +14,9 @@ import cobra
 from cobra.flux_analysis import gapfill
 
 
-panmodel=read_sbml_model("model/panYeast_v4_5.xml")
+panmodel=read_sbml_model("model/panYeast.xml")
 # test_strains
-ssGEM_dir="model/pan1800_tblastn4_coregene_ssGEMs/"
+ssGEM_dir="model/pan1800_ssGEMs/"
 test_strains=["GCA_019394525.1_ASM1939452v1_genomic.xml","GCA_019394085.1_ASM1939408v1_genomic.xml","GCA_019394815.1_ASM1939481v1_genomic.xml"]
 for strain in test_strains:
     model=read_sbml_model(ssGEM_dir+strain)
@@ -104,6 +104,11 @@ for column in simu_columns:
     simul_growthMatrix.loc[simul_growthMatrix[column]>0.01,column]=1
 simul_growthMatrix.fillna(0,inplace=True)
 
+# save simulation growthMatrix and experiment growthMatrix into one excel
+writer=pd.ExcelWriter("result/model_simulation/61substrate_prediction.xlsx")
+simul_growthMatrix.to_excel(writer,sheet_name="simulation")
+growthMatrix.to_excel(writer,sheet_name="experiment")
+writer.save()
 
 # caculate the prediction accuracy
 def cal_accuracy(exp_data,sim_data,exp_column,sim_column):

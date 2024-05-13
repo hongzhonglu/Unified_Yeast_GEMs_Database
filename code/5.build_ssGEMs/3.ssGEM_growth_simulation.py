@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-# date : 2023/5/31 
-# author : wangh
-# file : 3.ssGEM_growth_simulation.py
-# project : Unified_Yeast_GEMs_Database
 import os
 import sys
 from cobra.io import read_sbml_model
@@ -24,7 +20,7 @@ def ssGEM_simulation(strain,file_path):
     for x in model.reactions:
         if x.flux != 0:
             aerobic_active_rxn_count += 1
-    # 统计无氧生长表型和激活反应数量
+    # anaerobic growth phenotype and active reaction number
     try:
         anaerobic_model = anaerobic_simulation(model)
         anaerobic_growth_value = anaerobic_model.slim_optimize()
@@ -43,7 +39,7 @@ def ssGEM_simulation(strain,file_path):
 
 # sleep 2 hours
 # if __name__ == '__main__':
-ssGEM_dir="model/pan1800_tblastn4_coregene_ssGEMs/"
+ssGEM_dir="model/pan1800_ssGEMs/"
 strains_list=os.listdir(ssGEM_dir)
 col=['gene_numb','rxn_numb','aerobic_growth','aerobic_rxns','anaerobic_growth','anaerobic_rxns']
 # pool=multiprocessing.Pool(processes=1)
@@ -52,7 +48,7 @@ for strain in strains_list:
     ssGEMs_eval[strain]=ssGEM_simulation(strain,ssGEM_dir)
 ssGEM_simulation_result=pd.DataFrame(ssGEMs_eval,index=col).T
 len(ssGEM_simulation_result[ssGEM_simulation_result['aerobic_growth']>0.04])
-ssGEM_simulation_result.to_csv("result/ssGEM_simulation/pan1800_v2_tblastn4_nacore100_etc_ssGEMs_simulation_result.csv")
+ssGEM_simulation_result.to_csv(r"result/model_simulation/df_ssGEMs_size.csv")
 
 
 
