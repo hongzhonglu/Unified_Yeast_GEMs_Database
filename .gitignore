@@ -13,6 +13,7 @@ code/4.core genome_analysis/coregenome_compare_other_sce_core/output/
 code/5.build_ssGEMs/output/
 code/6.transcriptomics_ssGEMs_analysis/output/
 code/7.human_diary_ethanol_analysis/output/
+.idea/
 
 # ignore .git directories
 .git/
