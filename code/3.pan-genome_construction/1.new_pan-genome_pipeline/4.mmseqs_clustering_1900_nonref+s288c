@@ -1,0 +1,25 @@
+# nonref_v4_filtered+s288c: cov50 pid70
+mmseqs easy-cluster code/3.pan-genome_construction/1.new_pan-genome_pipeline/output/1900sce_s288c+nonref_v4_filtered.fasta code/3.pan-genome_construction/1.new_pan-genome_pipeline/output/1900sce_s288c+nonref_v4_filtered_cov50_pid70 tmp -c 0.5 --min-seq-id 0.7 -e 0.00001 --cov-mode 0 --cluster-mode 1
+
+# nonref_v4_filtered+s288c: cov50 pid70 cluster-mode 0
+mmseqs easy-cluster code/3.pan-genome_construction/1.new_pan-genome_pipeline/output/1900sce_s288c+nonref_v4_filtered.fasta code/3.pan-genome_construction/1.new_pan-genome_pipeline/output/1900sce_s288c+nonref_v4_filtered_cov50_pid70_mode0 tmp -c 0.5 --min-seq-id 0.7 -e 0.00001 --cov-mode 0 --cluster-mode 0
+
+# nonref_v4_filtered+s288c: cov50 pid80
+mmseqs easy-cluster code/3.pan-genome_construction/1.new_pan-genome_pipeline/output/1900sce_s288c+nonref_v4_filtered.fasta code/3.pan-genome_construction/1.new_pan-genome_pipeline/output/1900sce_s288c+nonref_v4_filtered_cov50_pid80 tmp -c 0.5 --min-seq-id 0.8 -e 0.00001 --cov-mode 0 --cluster-mode 1
+
+# nonref_v4_filtered+s288c: cov60 pid70
+mmseqs easy-cluster code/3.pan-genome_construction/1.new_pan-genome_pipeline/output/1900sce_s288c+nonref_v4_filtered.fasta code/3.pan-genome_construction/1.new_pan-genome_pipeline/output/1900sce_s288c+nonref_v4_filtered_cov60_pid70 tmp -c 0.6 --min-seq-id 0.7 -e 0.00001 --cov-mode 0 --cluster-mode 1
+
+# nonref_v4_filtered+s288c: cov50 pid60
+mmseqs easy-cluster code/3.pan-genome_construction/1.new_pan-genome_pipeline/output/1900sce_s288c+nonref_v4_filtered.fasta code/3.pan-genome_construction/1.new_pan-genome_pipeline/output/1900sce_s288c+nonref_v4_filtered_cov50_pid60 tmp -c 0.5 --min-seq-id 0.6 -e 0.00001 --cov-mode 0 --cluster-mode 0
+
+# nonref_v4_filtered+s288c: cov60 pid60
+mmseqs easy-cluster code/3.pan-genome_construction/1.new_pan-genome_pipeline/output/1900sce_s288c+nonref_v4_filtered.fasta code/3.pan-genome_construction/1.new_pan-genome_pipeline/output/1900sce_s288c+nonref_v4_filtered_cov60_pid60 tmp -c 0.6 --min-seq-id 0.6 -e 0.00001 --cov-mode 0 --cluster-mode 1
+
+# nonref_v4_filtered+s288c re-clustering: cov50 pid70
+mmseqs easy-cluster code/3.pan-genome_construction/1.new_pan-genome_pipeline/output/pan1900_new_v4_50_70.fasta code/3.pan-genome_construction/1.new_pan-genome_pipeline/output/1900sce_s288c+nonref_v4_filtered_cov50_pid70_reclustering tmp -c 0.5 --min-seq-id 0.7 -e 0.00001 --cov-mode 0 --cluster-mode 1
+
+# s288c clustering
+mmseqs easy-cluster data/genome/S288c_R64.fasta code/3.pan-genome_construction/1.new_pan-genome_pipeline/output/s288c_cov50_pid60 tmp -c 0.5 --min-seq-id 0.6 -e 0.00001 --cov-mode 0 --cluster-mode 1
+
+

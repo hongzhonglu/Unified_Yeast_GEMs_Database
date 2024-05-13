@@ -1,0 +1,7 @@
+# bbh: pan1800_v2 vs pan1011
+mmseqs easy-rbh /mnt/d/code/github/Unified_Yeast_GEMs_Database_from_13pro/Unified_Yeast_GEMs_Database/data/genome/pan1800_50_70_v2.fasta /mnt/d/code/github/Unified_Yeast_GEMs_Database_from_13pro/Unified_Yeast_GEMs_Database/data/genome/pan1011_v1.fasta /mnt/d/code/github/Unified_Yeast_GEMs_Database_from_13pro/Unified_Yeast_GEMs_Database/code/3.pan-genome_construction/3.pan-genome_comparison/output/pan1800_v2_vs_pan1011_bbh.txt tmp --comp-bias-corr 0 --mask 0
+
+
+
+
+

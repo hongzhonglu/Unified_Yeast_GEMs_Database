@@ -1,0 +1,6 @@
+cat INPUT|cut -f1 -d ' ' >input.fa
+rake -f FLO_PATH/Rakefile --trace
+gffread run/R64_cleaned_parent/lifted_cleaned.gff -g input.fa -J -y protein.fasta -S
+cp protein.fasta /lustre/home/acct-clslhz/clslhz/why_ssGEMs/data/flo_proteomes/OUT.fasta
+cp run/R64_cleaned_parent/lifted_cleaned.gff /lustre/home/acct-clslhz/clslhz/why_ssGEMs/data/flo_gff/OUT.gff
+sh clean.sh

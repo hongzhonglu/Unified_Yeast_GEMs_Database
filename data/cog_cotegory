@@ -1,0 +1,26 @@
+J	FCCCFC	Translation, ribosome biogenesis
+A	FCDCFC	RNA processing and modification
+K	FCDCEC	Transcription
+L	FCDCDC	DNA replication and repair
+B	FCDCCC	Chromatin structure and dynamics
+D	FCFCDC	Cell cycle control,cell division
+Y	FCFCCC	Nuclear structure
+V	FCFCBC	Defense mechanisms
+T	FCFCAC	Signal transduction mechanisms
+M	ECFCAC	Cell membrane biogenesis
+N	DCFCAC	Cell motility
+Z	CCFCAC	Cytoskeleton
+W	BCFCAC	Extracellular structures
+U	ACFCAC	Intracellular trafficking,secretion
+O	9CFCAC	Posttranslational modification
+X	9CFC9C	Mobilome:prophages,transposons
+C	BCFCFC	Energy production and conversion
+G	CCFCFC	Carbohydrate metabolism
+E	DCFCFC	Amino acid metabolism
+F	DCECFC	Nucleotide metabolism
+H	DCDCFC	Coenzyme metabolism
+I	DCCCFC	Lipid metabolism
+P	CCCCFC	Inorganic ion metabolism
+Q	BCCCFC	Secondary metabolites biosynthesis
+R	E0E0E0	General function prediction only
+S	CCCCCC	Function unknown
