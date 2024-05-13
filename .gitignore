@@ -1,0 +1,19 @@
+# ignore file directories
+data/transcriptomics/
+.vscode/
+*.ipynb_checkpoints/
+*.pyc
+code/1.genome_collection/outputs/
+code/3.pan-genome_construction/1.new_pan-genome_pipeline/output/
+code/3.pan-genome_construction/2.build_geneMatrix/output/
+code/3.pan-genome_construction/3.pan-genome_comparison/output/
+code/3.pan-genome_construction/contamination/output/
+code/4.core genome_analysis/compare_with_closed_yeasts/output/
+code/4.core genome_analysis/coregenome_compare_other_sce_core/output/
+code/5.build_ssGEMs/output/
+code/6.transcriptomics_ssGEMs_analysis/output/
+code/7.human_diary_ethanol_analysis/output/
+
+# ignore .git directories
+.git/
+.DS_Store

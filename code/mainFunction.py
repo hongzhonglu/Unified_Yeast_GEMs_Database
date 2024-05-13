@@ -91,7 +91,6 @@ s=[3,1,2,4]
 singleMapping(w,v,s,dataframe=False)
 '''
 
-
 def multiMapping (description, item1, item2, dataframe=True, sep=";", removeDuplicates=True):
     """get multiple description of from item1 for item2 based on mapping"""
     #description = w
@@ -316,7 +315,10 @@ def getStrainGEM(s0, geneMatrix0, templateGEM, templateGene):
     remove_genes(newModel, gene_remove, remove_reactions=True)
     return newModel
 
-
+# n=0
+# for i in gene_exist:
+#     if i==1.0:n+=1
+# print(n)
 
 
 
@@ -446,7 +448,7 @@ def getRXNmetaboliteMapping(rxn0, met0):
     input, for example rxn0=['r1','g2']
     gpr0=['a => c','a => b']
     output, each rxn related with each gene'''
-    met_annotation = pd.read_excel('../data/met_yeastGEM.xlsx')
+    met_annotation = pd.read_excel('../data/met_panYeast_v3.xlsx')
     s1 = rxn0
     s2 = met0
     s3 = splitAndCombine(s2,s1,sep0=" ")
@@ -524,8 +526,9 @@ def produceRxnList(model0):
   gem_dataframe['ID'] = ['R'+ str(i) for i in range(0, len(model0.reactions))]
   gem_dataframe['GPR'] = gem_dataframe['GPR'].str.replace('__45__', '-')
   #replace the metabolite name in gem_dataframe
-  s0 = getRXNmetaboliteMapping(gem_dataframe['rxnID'], gem_dataframe['equation'])
-  gem_dataframe['formula'] = multiMapping(s0['met_name'],s0['rxnID'],gem_dataframe['rxnID'],removeDuplicates=False)
+  s0 = getRXNmetaboliteMapping(rxn0=gem_dataframe['rxnID'], met0=gem_dataframe['equation'])
+  # map
+  gem_dataframe['formula'] = multiMapping(description=s0['met_name'],item1=s0['rxnID'],item2=gem_dataframe['rxnID'],removeDuplicates=False)
   gem_dataframe['formula'] = gem_dataframe['formula'].str.replace(";", " ")
   return gem_dataframe
 
@@ -892,17 +895,42 @@ def rescale_pseudorxn(model,met_name,f):
         return model
 
 
-def check_strain_info(ssGEM_id):
+def rename_ssGEM_id(id=False,ids_list=False):
+    '''modify ssGEM id, make it correspond to the all_strain_infomation'''
+    if id:
+        print("modify one ssGEM id,and reture a id str")
+        new_id=id.strip(".xml")
+        if new_id.startswith("GCA"):
+            new_id="_".join(new_id.split("_")[:2])
+        else:
+            new_id.replace(".re","")
+            new_id.split("_")[0]
+        return  new_id
+    if ids_list:
+        print("modeify a list of ssGEM's id,and reture a list of standardize id")
+        new_ids_list=[]
+        for id in ids_list:
+            new_id = id.strip(".xml")
+            if new_id.startswith("GCA"):
+                new_id = "_".join(new_id.split("_")[:2])
+            else:
+                new_id=new_id.replace(".re", "")
+                new_id=new_id.split("_")[0]
+            new_ids_list.append(new_id)
+        return new_ids_list
+
+
+def check_strains_info(ssGEM_ids_list):
     '''strain_id:the strain you are interested in.
     usage: info=check_info('AAA')/check_info('AAA.xml')
     '''
     import pandas as pd
-    ssGEM_id=ssGEM_id.strip('.xml')
-    all_strains_info=pd.read_excel('data/1897_strains_info.xlsx')
-    strain_info=all_strains_info[all_strains_info['ssGEM']==ssGEM_id]
-    if not len(strain_info):
-        print("can't find %s"%ssGEM_id)
-    return strain_info
+
+    ssGEM_ids_list_v2 = rename_ssGEM_id(id=False, ids_list=ssGEM_ids_list)
+    all_strains_info=pd.read_excel('data/strain_information/1897_strains_info.xlsx',index_col=0)
+
+    strains_info=all_strains_info.loc[all_strains_info["ssGEM"].isin(ssGEM_ids_list_v2)]
+    return strains_info
 
 
 def make_blast_db(seq, folder, db_type='prot'):
@@ -994,7 +1022,7 @@ def run_blastp(seq, db, in_folder='prots', out_folder='bbh', out=None, outfmt=6,
 # define a function to get sequence length
 def get_gene_lens(query, in_folder='test/build_geneMatrix/all_cds'):
     from Bio import SeqIO
-    file = '%s/%s.fa' % (in_folder, query)
+    file = '%s/%s' % (in_folder, query)
     handle = open(file)
     records = SeqIO.parse(handle, "fasta")
     out = []
@@ -1024,7 +1052,6 @@ def get_bbh(query, subject, in_folder='bbh'):
         subject_lengths = get_gene_lens(subject, in_folder='test/build_geneMatrix/blast_db')
 
         # Define the output file of this BLAST
-
 
         # Combine the results of the protein BLAST into a dataframe
         print('parsing BBHs for', query, subject)
