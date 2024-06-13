@@ -11,8 +11,6 @@ import os    ##for directory
 import sys
 import pprint
 
-
-
 '''general function for easy use of python'''
 def splitAndCombine(gene, rxn, sep0, moveDuplicate=False):
     ## one rxn has several genes, this function was used to splite the genes
