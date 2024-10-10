@@ -17,3 +17,6 @@ code/7.human_diary_ethanol_analysis/output/
 # ignore .git directories
 .git/
 .DS_Store
+/data/genome/sce/pep/
+/data/genome/yeast_species/pep/
+/model/ssGEMs/
