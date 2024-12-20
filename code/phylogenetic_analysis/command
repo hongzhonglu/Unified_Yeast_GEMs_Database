@@ -1,0 +1,29 @@
+# set environment
+conda install bioconda::trimal
+conda install bioconda::mafft
+conda install bioconda::iqtree
+
+# run
+mafft --thread 8 --auto --maxiterate 1000 input.fasta > output.fasta
+trimal -in aligned.fa -out aligned_trimed.fa -gappyout
+iqtree -s example.phy -m MFP
+
+
+# add constraint to tree
+iqtree -s example.phy -m MFP -g constr.tre
+
+
+# build concatenated supergene file by FASconCAT
+perl FASconCAT-G_v1.06.1.pl -j -s
+
+# transfer from sjtu to local
+scp clslhz@sydata.hpc.sjtu.edu.cn:/dssg/home/acct-clslhz/clslhz/why_ssGEM/Unified_Yeast_GEMs_Database/code/phylogenetic_analysis/fasconcat_input/FcC* /home/dell/why/
+rsync --archive --partial --progress clslhz@sydata.hpc.sjtu.edu.cn:/dssg/home/acct-clslhz/clslhz/why_ssGEM/Unified_Yeast_GEMs_Database/code/phylogenetic_analysis/fasconcat_input/ /home/dell/why/fasconcat_input
+scp /home/dell/why/coreORFs_supermatrix.fas clslhz@sydata.hpc.sjtu.edu.cn:/dssg/home/acct-clslhz/clslhz/why_ssGEM/Unified_Yeast_GEMs_Database/code/phylogenetic_analysis/
+
+# fasttree
+FastTree -lg  alignment_file > coreORFs_fasttree.tre
+
+find iqtree_input -type f -name "*.fa" -exec sh -c 'cp "$0" "fasconcat_input/$(basename "$0" .fa).fas"' {} \;
+
+awk '/^>/ {print; next} {for (i=1; i<=length($0); i+=4000) print substr($0, i, 4000)}' input.fasta > output.fasta
