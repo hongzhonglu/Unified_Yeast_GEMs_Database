@@ -28,3 +28,5 @@ code/7.human_diary_ethanol_analysis/output/
 /code/6.transcriptomics_ssGEMs_analysis/2.riptide_ssGEMs_result_analysis.ipynb
 /code/6.transcriptomics_ssGEMs_analysis/3.fix_growth_ssGEMs_simulation_by_riptide.py
 /code/6.transcriptomics_ssGEMs_analysis/3.run_riptide.slurm
+/code/7.human_diary_ethanol_analysis/SNP_analysis/output/
+/data/human_bioethanol_dairy_wt_SNP_indel.gvcf

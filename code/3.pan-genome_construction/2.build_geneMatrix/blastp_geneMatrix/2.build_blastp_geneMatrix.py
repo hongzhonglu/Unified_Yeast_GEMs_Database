@@ -9,7 +9,7 @@ import sys
 import numpy as np
 from Bio import SeqIO
 from tqdm import tqdm
-sys.path.append(r"D:\code\github\Unified_Yeast_GEMs_Database_from_13pro\Unified_Yeast_GEMs_Database\code")
+sys.path.append(r"D:\code\github\Unified_Yeast_GEMs_Database\code")
 from mainFunction import get_gene_lens
 import re
 
@@ -62,7 +62,7 @@ def build_geneMatrix(strainList,geneList,pangenome,pangenome_dir,proteome_dir,bb
     # pan_re=r'_new_cov.*\.fasta$'
     for strain in tqdm(strainList):
         try:
-            blastp_file=parse_blastp_result(blastp_file=strain.rstrip(".fa")+"_vs_"+"pan1800_v2"+".txt",
+            blastp_file=parse_blastp_result(blastp_file=strain.rstrip(".fa")+"_vs_"+pangenome.rstrip('.fasta')+"_blastp.txt",
                                   blastp_dir=bbh_file_dir,
                                   query=strain,
                                   query_dir=proteome_dir,
@@ -89,21 +89,23 @@ def build_geneMatrix(strainList,geneList,pangenome,pangenome_dir,proteome_dir,bb
 # get geneMatrix
 import os
 from Bio.SeqIO import parse
-strainList=os.listdir(r"data/genome/predicted_proteomes/combined_proteomes_old")
-pangenome_dir=r"code/3.pan-genome_construction/1.new_pan-genome_pipeline/output/"
-pangenome="pan1900_new_v4_50_70_v2_filter.fasta"
-blastp_file_dir=r"code/3.pan-genome_construction/2.build_geneMatrix/output/blastp_vs_pan1900_new_v4_50_70_v2_filter/"
+strainList=os.listdir(r"data/genome/sce/pep")
+pangenome_dir=r"data/genome/"
+# pangenome="pan1807.fasta"
+pangenome="lg_pan1392.fasta"
+# pangenome="na_pan1011.fasta"
+blastp_file_dir=r"code/3.pan-genome_construction/2.build_geneMatrix/output/blastp_vs_%s/"%(pangenome.rstrip('.fasta'))
 geneList=[g.id for g in parse(pangenome_dir+pangenome,"fasta")]
-proteome_dir=r"data/genome/predicted_proteomes/combined_proteomes_old/"
+proteome_dir=r"data/genome/sce/pep/"
 
 
 # # set 3 hours sleep time
 # import time
 # time.sleep(3*60*60)
 
-# rename all files name in blastp_file_dir by changing "pan1900_new_v4_50_70_v2_filter" to "pan1800_v2"
-for file in os.listdir(blastp_file_dir):
-    os.rename(blastp_file_dir+file,blastp_file_dir+file.replace("pan1900_new_v4_50_70_v2_filter","pan1800_v2"))
+# # rename all files name in blastp_file_dir by changing "pan1900_new_v4_50_70_v2_filter" to "pan1800_v2"
+# for file in os.listdir(blastp_file_dir):
+#     os.rename(blastp_file_dir+file,blastp_file_dir+file.replace("pan1900_new_v4_50_70_v2_filter","pan1800_v2"))
 
 # get geneMatrix and cnvMatrix
 geneMatrix,cnvMatrix=build_geneMatrix(strainList=strainList,
@@ -115,29 +117,48 @@ geneMatrix,cnvMatrix=build_geneMatrix(strainList=strainList,
                             cov_cutoff=0.5,
                             pid_cutoff=0.7)
 
-# rebuild some lost strain which the sum of geneMatrix is 0
-strainList_lost=geneMatrix.columns[geneMatrix.sum()==0].tolist()
-geneMatrix_lost,cnvMatrix_lost=build_geneMatrix(strainList=strainList_lost,
-                            geneList=geneList,
-                            pangenome=pangenome,
-                            pangenome_dir=pangenome_dir,
-                            proteome_dir=proteome_dir,
-                            bbh_file_dir=blastp_file_dir,
-                            cov_cutoff=0.5,
-                            pid_cutoff=0.7)
-
-# replace columns in geneMatrix and cnvMatrix by columns in geneMatrix_lost and cnvMatrix_lost
-geneMatrix[geneMatrix.columns[geneMatrix.sum()==0]]=geneMatrix_lost
-cnvMatrix[cnvMatrix.columns[cnvMatrix.sum()==0]]=cnvMatrix_lost
+# # rebuild some lost strain which the sum of geneMatrix is 0
+# strainList_lost=geneMatrix.columns[geneMatrix.sum()==0].tolist()
+# geneMatrix_lost,cnvMatrix_lost=build_geneMatrix(strainList=strainList_lost,
+#                             geneList=geneList,
+#                             pangenome=pangenome,
+#                             pangenome_dir=pangenome_dir,
+#                             proteome_dir=proteome_dir,
+#                             bbh_file_dir=blastp_file_dir,
+#                             cov_cutoff=0.5,
+#                             pid_cutoff=0.7)
+#
+# # replace columns in geneMatrix and cnvMatrix by columns in geneMatrix_lost and cnvMatrix_lost
+# geneMatrix[geneMatrix.columns[geneMatrix.sum()==0]]=geneMatrix_lost
+# cnvMatrix[cnvMatrix.columns[cnvMatrix.sum()==0]]=cnvMatrix_lost
 
 # replace geneID with panID
-df_panID_geneID_dict=pd.read_excel("result/panID_geneID.xlsx")
-df_panID_geneID_dict.set_index("geneID",inplace=True)
-geneMatrix.index=geneMatrix.index.map(lambda x:df_panID_geneID_dict.loc[x,"panID"])
-cnvMatrix.index=cnvMatrix.index.map(lambda x:df_panID_geneID_dict.loc[x,"panID"])
+if pangenome=="pan1807.fasta":
+    df_panID_geneID_dict=pd.read_excel("result/panID_geneID.xlsx")
+    df_panID_geneID_dict.set_index("geneID",inplace=True)
+    geneMatrix.index=geneMatrix.index.map(lambda x:df_panID_geneID_dict.loc[x,"panID"])
+    cnvMatrix.index=cnvMatrix.index.map(lambda x:df_panID_geneID_dict.loc[x,"panID"])
 
-geneMatrix.to_csv("data/geneMatrix/pan1900_new_50_70_v2_blastp_geneMatrix.csv")
-cnvMatrix.to_csv("data/geneMatrix/pan1900_new_50_70_v2_blastp_cnvMatrix.csv")
+elif pangenome=="lg_pan1392.fasta":
+    df_bbh=pd.read_csv(r'code/3.pan-genome_construction/3.pan-genome_comparison/output/pan1807_vs_pan1392_bbh.txt',sep='\t',header=None)
+    # set pan1392 ID as index
+    df_bbh.set_index(1,inplace=True)
+    geneMatrix.index=geneMatrix.index.map(lambda x:df_bbh.loc[x,0] if x in df_bbh.index else x)
+    cnvMatrix.index=cnvMatrix.index.map(lambda x:df_bbh.loc[x,0] if x in df_bbh.index else x)
+
+elif pangenome=="na_pan1011.fasta":
+    df_bbh=pd.read_csv(r'code/3.pan-genome_construction/3.pan-genome_comparison/output/pan1807_vs_pan1011_bbh.txt',sep='\t',header=None)
+    # set pan1011 ID as index
+    df_bbh.set_index(1,inplace=True)
+    geneMatrix.index=geneMatrix.index.map(lambda x:df_bbh.loc[x,0] if x in df_bbh.index else x)
+    cnvMatrix.index=cnvMatrix.index.map(lambda x:df_bbh.loc[x,0] if x in df_bbh.index else x)
+
+
+
+output_genematrix_path=r'data/geneMatrix/%s_blastp_geneMatrix.csv'%(pangenome.rstrip('.fasta'))
+output_cnvmatrix_path=r'data/geneMatrix/%s_blastp_cnvMatrix.csv'%(pangenome.rstrip('.fasta'))
+geneMatrix.to_csv(output_genematrix_path)
+cnvMatrix.to_csv(output_cnvmatrix_path)
 
 # check which column has all 0: AKB_2.re.fa
 geneMatrix.loc[:,geneMatrix.sum()==0]
@@ -148,7 +169,7 @@ len(gene_ratio[gene_ratio==1])
 
 # load all strain data
 all_strain_info=pd.read_excel("data/1897_strains_info.xlsx", index_col=0)
-kept_strainList=all_strain_info[all_strain_info["remove"]==False]["genome_id"].tolist()
+kept_strainList=all_strain_info[all_strain_info["remove"]==False].index.tolist()
 kept_strainList=[s+".fa" for s in kept_strainList]
 kept_strainList.append('s288c_R64.fa')
 

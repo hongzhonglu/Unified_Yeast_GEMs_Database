@@ -156,7 +156,10 @@ def set_SCmedium(model):
     # block some exchange reactions
     blockedExchanges = ['r_1663', 'r_4062', 'r_4064']
     for rxn in blockedExchanges:
-        model.reactions.get_by_id(rxn).bounds = (0, 0)
+        try:
+            model.reactions.get_by_id(rxn).bounds = (0, 0)
+        except:
+            pass
     minimal_medium={'r_1654': 1000, # ammonium exchange
                 'r_1992': 1000, # oxygen exchange
                 'r_2005': 1000, # phosphate exchange
@@ -205,4 +208,34 @@ def set_SCmedium(model):
     return model
 
 
+def set_minimal_medium(model):
+    # 'r_1663'; ... % bicarbonate exchange
+    #  'r_4062'; ... % lipid backbone exchange
+    #  'r_4064'};    % lipid chain exchange
 
+    # block some exchange reactions
+    blockedExchanges = ['r_1663', 'r_4062', 'r_4064']
+    for rxn in blockedExchanges:
+        try:
+            model.reactions.get_by_id(rxn).bounds = (0, 0)
+        except:
+            pass
+    minimal_medium={'r_1654': 1000, # ammonium exchange
+                'r_1992': 1000, # oxygen exchange
+                'r_2005': 1000, # phosphate exchange
+                'r_2060': 1000, # sulphate exchange
+                'r_1861': 1000, # iron exchange, for test of expanded biomass def
+                'r_1832': 1000, # hydrogen exchange
+                'r_2100': 1000, # water exchange
+                'r_4593': 1000, # chloride exchange
+                'r_4595': 1000, # Mn(2+) exchange
+                'r_4596': 1000, # Zn(2+) exchange
+                'r_4597': 1000, # Mg(2+) exchange
+                'r_2049': 1000, # sodium exchange
+                'r_4594': 1000, # Cu(2+) exchange
+                'r_4600': 1000, # Ca(2+) exchange
+                'r_2020': 1000,# potassium exchange
+                'r_1714': 20    # glucose exchange
+                    }
+    model.medium = minimal_medium
+    return model

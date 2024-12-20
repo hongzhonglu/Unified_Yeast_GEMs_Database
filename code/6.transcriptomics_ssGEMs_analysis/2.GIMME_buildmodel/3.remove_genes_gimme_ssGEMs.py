@@ -7,11 +7,19 @@ import pandas as pd
 import tqdm
 
 # set work directory
-os.chdir(r'D:\github\Unified_Yeast_GEMs_Database')
+os.chdir(r'D:\code\github\Unified_Yeast_GEMs_Database')
 
-input_model_dir = 'code/6.transcriptomics_ssGEMs_analysis/2.GIMME_buildmodel/output/gimme_ssGEMs'
-output_model_dir = 'code/6.transcriptomics_ssGEMs_analysis/2.GIMME_buildmodel/output/gimme_ssGEMs_shrinked'
+input_model_dir = 'code/6.transcriptomics_ssGEMs_analysis/output/GIMME_0.85_ssGEMs'
+output_model_dir = 'code/6.transcriptomics_ssGEMs_analysis/output/GIMME_0.85_ssGEMs'
 strainList = os.listdir(input_model_dir)
+
+# load panmodel
+panmodel=read_sbml_model('model/panYeast.xml')
+
+geneList=[gene.id for gene in panmodel.genes]
+rxnList=[rxn.id for rxn in panmodel.reactions]
+
+
 
 df_gimme_ssGEMs_size=pd.DataFrame()
 gene_numbs=[]
@@ -19,13 +27,20 @@ rxn_numbs=[]
 met_numbs=[]
 strain_names=[]
 
+geneMatrix=pd.DataFrame(index=geneList)
+rxnMatrix=pd.DataFrame(index=rxnList)
+
 for strain in tqdm.tqdm(strainList):
     # check if the model have existed in the output directory
-    if os.path.exists(os.path.join(output_model_dir, strain)):
-        print('The ssGEM of {} have existed in the output directory!'.format(strain))
-        continue
+    # if os.path.exists(os.path.join(output_model_dir, strain)):
+    #     print('The ssGEM of {} have existed in the output directory!'.format(strain))
+    #     continue
     # load model
-    model = read_sbml_model(os.path.join(input_model_dir, strain))
+    try:
+        model = read_sbml_model(os.path.join(input_model_dir, strain))
+    except:
+        print('The ssGEM of {} is not exist!'.format(strain))
+        continue
 
     ori_gene_num = len(model.genes)
     ori_rxn_num = len(model.reactions)
@@ -58,13 +73,24 @@ for strain in tqdm.tqdm(strainList):
     met_numbs.append(new_met_num)
 
     model.id= strainname
+
+    strain_geneList = [gene.id for gene in model.genes]
+    strain_rxnList = [rxn.id for rxn in model.reactions]
+    geneMatrix.loc[strain_geneList, strainname] = 1
+    rxnMatrix.loc[strain_rxnList, strainname] = 1
+
     # save the model
-    write_sbml_model(model, os.path.join(output_model_dir, strain))
+    # write_sbml_model(model, os.path.join(output_model_dir, strain))
 
 df_gimme_ssGEMs_size['strain'] = strain_names
 df_gimme_ssGEMs_size['gene_number'] = gene_numbs
 df_gimme_ssGEMs_size['reaction_number'] = rxn_numbs
 df_gimme_ssGEMs_size['metabolite_number'] = met_numbs
-df_gimme_ssGEMs_size.to_csv('code/6.transcriptomics_ssGEMs_analysis/2.GIMME_buildmodel/output/gimme_ssGEMs_size.csv', index=False)
+df_gimme_ssGEMs_size.to_csv('code/6.transcriptomics_ssGEMs_analysis/output/gimme_0.85_ssGEMs_size.csv', index=False)
 
+# fill nan as 0
+geneMatrix.fillna(0, inplace=True)
+rxnMatrix.fillna(0, inplace=True)
+geneMatrix.to_csv('code/6.transcriptomics_ssGEMs_analysis/output/gimme_0.85_ssGEMs_geneMatrix.csv')
+rxnMatrix.to_csv('code/6.transcriptomics_ssGEMs_analysis/output/gimme_0.85_ssGEMs_rxnMatrix.csv')
 

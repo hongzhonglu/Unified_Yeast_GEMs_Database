@@ -7,15 +7,17 @@ import os
 
 # tblastn script parameters:
 ref_genome="pan1800.fasta"
+# ref_genome="na_pan1011.fasta"
+# ref_genome="lg_pan1392.fasta"
 ref_name=ref_genome.rstrip(".fasta")
 output_script="code/3.pan-genome_construction/2.build_geneMatrix/blastp_geneMatrix/1.mmseqs2_blastp_vs_%s.sh"%ref_name
-target_dir = "/mnt/d/code/github/Unified_Yeast_GEMs_Database_from_13pro/Unified_Yeast_GEMs_Database/data/genome/"
-blastp_output_dir="/mnt/d/code/github/Unified_Yeast_GEMs_Database_from_13pro/Unified_Yeast_GEMs_Database/code/3.pan-genome_construction/2.build_geneMatrix/output/blastp_vs_%s/"%ref_name
-proteomes_dir_wsl="/mnt/d/code/github/Unified_Yeast_GEMs_Database_from_13pro/Unified_Yeast_GEMs_Database/data/genome/predicted_proteomes/combined_proteomes_old/"
+target_dir = "/mnt/d/code/github/Unified_Yeast_GEMs_Database/data/genome/"
+blastp_output_dir="/mnt/d/code/github/Unified_Yeast_GEMs_Database/code/3.pan-genome_construction/2.build_geneMatrix/output/blastp_vs_%s/"%ref_name
+proteomes_dir_wsl="/mnt/d/code/github/Unified_Yeast_GEMs_Database/data/genome/sce/pep/"
 blastp_template_cmd='mmseqs easy-search QUERY TARGET OUTPUT tmp --min-seq-id 0.6 -e 1e-5'
 
 # building code parameters:
-genomes_dir_win=r"data/genome/predicted_proteomes/combined_proteomes"
+genomes_dir_win=r"data/genome/sce/pep"
 genomeList=os.listdir(genomes_dir_win)
 
 # build scripts for 100 genomes to do tblastn process by mmeseqs2

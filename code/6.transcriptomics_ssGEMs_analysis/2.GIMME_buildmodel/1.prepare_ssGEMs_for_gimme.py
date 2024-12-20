@@ -15,15 +15,18 @@ os.chdir('/dssg/home/acct-clslhz/clslhz/why_ssGEM/Unified_Yeast_GEMs_Database/co
 rxn_expMatrix = pd.read_csv('output/sce969_rxn_expressionMatrix_normalized.csv',
                             index_col=0)
 
-ssGEM_dir = '../../model/pan1800_tblastn4_coregene_ssGEMs'
+ssGEM_dir = '../../model/ssGEMs'
 output_dir = 'output/gapfilled_ssGEMs'
 
-ref_model= read_sbml_model('../../model/panYeast_v4_5.xml')
+ref_model= read_sbml_model('../../model/panYeast.xml')
 ref_model= set_SCmedium(ref_model)
 ref_growth = ref_model.slim_optimize()
 
 strainList = list(rxn_expMatrix.columns)
 
+# check if output directory exist
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
 
 for strain in strainList:
 

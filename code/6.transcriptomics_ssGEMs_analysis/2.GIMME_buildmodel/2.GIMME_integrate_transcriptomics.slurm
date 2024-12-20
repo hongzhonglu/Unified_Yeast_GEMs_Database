@@ -9,5 +9,5 @@
 #SBATCH --mail-user=wanghy@dicp.ac.cn
 
 module load matlab/r2022a
-cd /dssg/home/acct-clslhz/clslhz/why_ssGEM/Unified_Yeast_GEMs_Database/code/7.transcriptomics_ssGEMs_analysis
+cd /dssg/home/acct-clslhz/clslhz/why_ssGEM/Unified_Yeast_GEMs_Database/code/6.transcriptomics_ssGEMs_analysis/2.GIMME_buildmodel
 matlab -r GIMME_run

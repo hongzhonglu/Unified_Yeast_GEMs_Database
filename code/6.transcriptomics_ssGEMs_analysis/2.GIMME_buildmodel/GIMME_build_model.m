@@ -5,30 +5,33 @@ function  GIMME_build_model(model_dir,transcriptomics_path,output_dir,threshold_
     % method: GIMME
 
     % add cobratoolbox to path
-    addpath(genpath('/dssg/home/acct-clslhz/clslhz/why_ssGEM/biosoft/cobratoolbox'));
+    % addpath(genpath('/dssg/home/acct-clslhz/clslhz/why_ssGEM/biosoft/cobratoolbox'));
 
     % initCobraToolbox(false)
     % changeCobraSolver ('glpk', 'all');
-    changeCobraSolver('gurobi','all')
+    changeCobraSolver('gurobi','all');
 
 
     % set working directory
-    % cd 'code/7.transcriptomics_ssGEMs_analysis'
+    % cd 'code/6.transcriptomics_ssGEMs_analysis'
 
 
     % load transcriptomics data
     [num,txt] = xlsread(transcriptomics_path);
-    %[num,txt] = xlsread('output/sce969_transcriptome_tpmMatrix.csv');
-
+    % [num,txt] = xlsread('../output/sce969_transcriptome_tpmMatrix.csv');
 
     strainList = txt(1, (2:end));
     exp.gene = txt((2:end), 1);
 
-    panModel= readCbModel('../../../model/panYeast.xml');
 
+    panModel= readCbModel('../../../model/panYeast.xml');
+    
+    strainList2=sort(strainList);
     % run GIMME for each strain
-    for i = 1 : length(strainList)
-        strainName= strainList{i};
+    for i = 1 : length(strainList2)
+        strainName= strainList2{i};
+        % search the index of the strainName in the strainList
+        index = find(ismember(strainList,strainName));
         % check if the model exists
         if ~isfile(strcat(model_dir, '/', strainName, '.xml'))
             continue
@@ -42,12 +45,13 @@ function  GIMME_build_model(model_dir,transcriptomics_path,output_dir,threshold_
         % model = panModel; % stratgy2: use the panYeast as the input model
         model= SCmedium(model);
         optimizeCbModel(model,'max').f
-        exp.rawValue = num(:,i);
-        exp.value = num(:,i);
+        exp.rawValue = num(:,index);
+        exp.value = num(:,index);
         [expressionRxns, parsedGPR] = mapExpressionToReactions(model, exp,true);
         % ignore reactions without genes by fill NaN with 1000
         expressionRxns(isnan(expressionRxns)) = 1000;
         threshold = quantile(expressionRxns(expressionRxns~=1000), 1-threshold_fraction);
+        fprintf('threshold: %f\n', threshold);
         options.expressionRxns = expressionRxns;
         options.threshold = threshold;
         options.solver = 'GIMME';
@@ -74,7 +78,7 @@ function  GIMME_build_model(model_dir,transcriptomics_path,output_dir,threshold_
 
         % write the model
         %writeCbModel(integrated_model, 'mat', modelFileName);
-        writeCbModel(integrated_model, 'sbml', modelFileName);
+        % writeCbModel(integrated_model, 'sbml', modelFileName);
         % check if gr >0
     %     if gr > 0
     %          writeCbModel(integrated_model, 'sbml', modelFileName);
