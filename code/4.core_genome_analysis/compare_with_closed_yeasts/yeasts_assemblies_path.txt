@@ -5,3 +5,4 @@
 /mnt/e/data/343_yeast/0_332yeast_genomes/332_genome_assemblies/332_genome_assemblies/saccharomyces_paradoxus.fna
 /mnt/e/data/343_yeast/0_332yeast_genomes/332_genome_assemblies/332_genome_assemblies/saccharomyces_uvarum.fna
 /mnt/e/data/343_yeast/0_332yeast_genomes/332_genome_assemblies/332_genome_assemblies/saccharomyces_cerevisiae.fna
+/mnt/e/data/1154yeast/genomes/assemblies/saccharomyces_jurei.fas

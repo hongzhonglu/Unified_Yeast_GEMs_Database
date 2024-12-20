@@ -8,14 +8,14 @@ import os
 # tblastn script parameters:
 ref_genome="S288c_R64.fasta"
 ref_name=ref_genome.split(".")[0]
-output_script="code/4.pan-genome_analysis/compare_with_closed_yeasts/new_pipeline_pan-genome/mmseqs2_%s_vs_7yeasts_blastp.sh"%ref_name
-target_dir = "/mnt/d/code/github/Unified_Yeast_GEMs_Database_from_13pro/Unified_Yeast_GEMs_Database/data/genome/"
-blastp_output_dir="/mnt/d/code/github/Unified_Yeast_GEMs_Database_from_13pro/Unified_Yeast_GEMs_Database/code/4.pan-genome_analysis/compare_with_closed_yeasts/output/blastp_%s/"%ref_name
-proteomes_dir_wsl="/mnt/d/code/github/Unified_Yeast_GEMs_Database_from_13pro/Unified_Yeast_GEMs_Database/data/genome/343_yeast_genomes/"
+output_script="code/4.core_genome_analysis/compare_with_closed_yeasts/1.build_yeasts_pan-genome/1.mmseqs2_%s_vs_yeasts_blastp.sh"%ref_name
+target_dir = "/mnt/d/code/github/Unified_Yeast_GEMs_Database/data/genome/"
+blastp_output_dir="/mnt/d/code/github/Unified_Yeast_GEMs_Database/code/4.core_genome_analysis/compare_with_closed_yeasts/output/blastp_%s/"%ref_name
+proteomes_dir_wsl="/mnt/d/code/github/Unified_Yeast_GEMs_Database/data/genome/yeast_species/pep/"
 blastp_template_cmd='mmseqs easy-search QUERY TARGET OUTPUT tmp --min-seq-id 0.6 -e 1e-5'
 
 # building code parameters:
-genomes_dir_win=r"data/genome/343_yeast_genomes/"
+genomes_dir_win=r"data/genome/yeast_species/pep/"
 genomeList=os.listdir(genomes_dir_win)
 
 # build scripts for 100 genomes to do tblastn process by mmeseqs2

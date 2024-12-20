@@ -6,8 +6,8 @@
 # combine two fasta file into one fasta file
 
 s288c_path="data/genome/S288c_R64.fasta"
-nonref_path=r"code/4.pan-genome_analysis/compare_with_closed_yeasts/output/7yeasts_s288c_nonref.fasta"
-output_path=r"code/4.pan-genome_analysis/compare_with_closed_yeasts/output/s288c+7yeasts_nonref.fasta"
+nonref_path=r"code/4.core_genome_analysis/compare_with_closed_yeasts/output/yeasts_s288c_nonref.fasta"
+output_path=r"code/4.core_genome_analysis/compare_with_closed_yeasts/output/s288c+yeasts_nonref.fasta"
 with open(output_path,"w") as f:
     with open(s288c_path,"r") as f1:
         for line in f1:

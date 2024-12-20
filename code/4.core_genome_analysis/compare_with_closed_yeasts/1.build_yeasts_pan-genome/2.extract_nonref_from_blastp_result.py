@@ -8,7 +8,7 @@ import os
 import pandas as pd
 import sys
 from Bio import SeqIO
-sys.path.append(r"D:\code\github\Unified_Yeast_GEMs_Database_from_13pro\Unified_Yeast_GEMs_Database\code")
+sys.path.append(r"D:\code\github\Unified_Yeast_GEMs_Database\code")
 from mainFunction import get_gene_lens
 
 def parse_blastp_result(blastp_file,blastp_dir,query,query_dir,subject,subject_dir):
@@ -68,14 +68,14 @@ def extract_nonref_genes(strainList,ref_genome,ref_dir,blastp_file_dir,proteomes
 
 
 if __name__ == '__main__':
-    os.chdir(r"D:\code\github\Unified_Yeast_GEMs_Database_from_13pro\Unified_Yeast_GEMs_Database")
-    protomes_dir=r"data/genome/343_yeast_genomes/"
+    os.chdir(r"D:\code\github\Unified_Yeast_GEMs_Database")
+    protomes_dir=r"data/genome/yeast_species/pep/"
     ref_genome="S288c_R64.fasta"
     ref_dir=r"data/genome/"
-    blastp_file_dir=r"code/4.pan-genome_analysis/compare_with_closed_yeasts/output/blastp_S288c_R64/"
-    output_dir="code/4.pan-genome_analysis/compare_with_closed_yeasts/output/"
-    output_fasta_file="7yeasts_s288c_nonref.fasta"
-    output_df_file="7yeasts_s288c_nonref_gene_count.csv"
+    blastp_file_dir=r"code/4.core_genome_analysis/compare_with_closed_yeasts/output/blastp_S288c_R64/"
+    output_dir="code/4.core_genome_analysis/compare_with_closed_yeasts/output/"
+    output_fasta_file="yeasts_s288c_nonref.fasta"
+    output_df_file="yeasts_s288c_nonref_gene_count.csv"
     strainList=os.listdir(protomes_dir)
     extract_nonref_genes(strainList=strainList,
                          ref_genome=ref_genome,

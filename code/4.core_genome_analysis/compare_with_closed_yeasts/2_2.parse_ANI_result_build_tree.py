@@ -7,7 +7,7 @@ import pandas as pd
 import os
 import tqdm
 
-os.chdir(r"D:/code/github/Unified_Yeast_GEMs_Database_from_13pro/Unified_Yeast_GEMs_Database")
+os.chdir(r"D:/code/github/Unified_Yeast_GEMs_Database")
 
 def parse_fastani_result(file_name,file_dir):
     '''parse the ANI triangle matrix result from fastANI, and return a full matrix in dataframe
@@ -15,10 +15,11 @@ def parse_fastani_result(file_name,file_dir):
     triangle_matrix = []
     with open(file_dir+file_name, 'r') as f:
         for line in f.readlines():
-            if "/mnt/e/data/343_yeast/0_332yeast_genomes/332_genome_assemblies/332_genome_assemblies/" not in line:
+            if "/mnt/e/data" not in line:
                 continue
             line=line.strip('\n')
             line=line.replace("/mnt/e/data/343_yeast/0_332yeast_genomes/332_genome_assemblies/332_genome_assemblies/","")
+            line=line.replace("/mnt/e/data/1154yeast/genomes/assemblies/","")
             ani_list=line.split('\t')+[100]
             triangle_matrix.append(ani_list)
 
@@ -43,10 +44,10 @@ def parse_fastani_result(file_name,file_dir):
     df=df.astype(float)
     return df
 
-df_7yeasts_aniMatrix=parse_fastani_result(r"7yeasts_ANI.matrix",r"code/4.pan-genome_analysis/compare_with_closed_yeasts/output/")
+df_yeasts_aniMatrix=parse_fastani_result(r"yeasts_ANI.matrix",r"code/4.core_genome_analysis/compare_with_closed_yeasts/output/")
 
 # convert aniMatrix to distanceMatrix
-df_7yeasts_distanceMatrix=100-df_7yeasts_aniMatrix
+df_yeasts_distanceMatrix=100-df_yeasts_aniMatrix
 
 # use distanceMatrix to build tree
 from scipy.cluster.hierarchy import linkage, dendrogram, to_tree
@@ -54,7 +55,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # calculate the linkage matrix
-linkage_matrix = linkage(df_7yeasts_distanceMatrix, 'ward')
+linkage_matrix = linkage(df_yeasts_distanceMatrix, 'ward')
 tree=to_tree(linkage_matrix)
 
 def get_newick(node, parent_dist, leaf_names, newick='') -> str:
@@ -79,10 +80,10 @@ def get_newick(node, parent_dist, leaf_names, newick='') -> str:
         newick = "(%s" % (newick)
         return newick
 
-newick=get_newick(tree, tree.dist, df_7yeasts_distanceMatrix.index.tolist())
+newick=get_newick(tree, tree.dist, df_yeasts_distanceMatrix.index.tolist())
 
 # write tree to newick file
-with open("code/4.pan-genome_analysis/compare_with_closed_yeasts/output/7yeasts_tree.newick","w") as f:
+with open("code/4.core_genome_analysis/compare_with_closed_yeasts/output/yeasts_tree.newick","w") as f:
     f.write(newick)
 
 

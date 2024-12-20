@@ -9,7 +9,7 @@ import sys
 import numpy as np
 from Bio import SeqIO
 from tqdm import tqdm
-sys.path.append(r"D:\code\github\Unified_Yeast_GEMs_Database_from_13pro\Unified_Yeast_GEMs_Database\code")
+sys.path.append(r"D:\code\github\Unified_Yeast_GEMs_Database\code")
 from mainFunction import get_gene_lens
 import re
 
@@ -62,7 +62,7 @@ def build_geneMatrix(strainList,geneList,pangenome,pangenome_dir,proteome_dir,bl
     # pan_re=r'_new_cov.*\.fasta$'
     for strain in tqdm(strainList):
         try:
-            blastp_file=parse_blastp_result(blastp_file=strain.rstrip(".fasta")+"_vs_"+"s288c_7yeastsnonref_blastp"+".txt",
+            blastp_file=parse_blastp_result(blastp_file=strain.rstrip(".fasta")+"_vs_"+"s288c_yeastsnonref_cov50_pid70_rep_seq_blastp"+".txt",
                                   blastp_dir=blastp_file_dir,
                                   query=strain,
                                   query_dir=proteome_dir,
@@ -89,12 +89,12 @@ def build_geneMatrix(strainList,geneList,pangenome,pangenome_dir,proteome_dir,bl
 # get geneMatrix
 import os
 from Bio.SeqIO import parse
-strainList=os.listdir(r"data/genome/343_yeast_genomes/")
-pangenome_dir=r"code/4.pan-genome_analysis/compare_with_closed_yeasts/output/"
-pangenome="s288c_7yeastsnonref_cov50_pid70_rep_seq.fasta"
-blastp_file_dir=r"code/4.pan-genome_analysis/compare_with_closed_yeasts/output/blastp_vs_s288c_7yeastsnonref_cov50_pid70_rep_seq/"
+strainList=os.listdir(r"data/genome/yeast_species/pep/")
+pangenome_dir=r"code/4.core_genome_analysis/compare_with_closed_yeasts/output/"
+pangenome="s288c_yeastsnonref_cov50_pid70_rep_seq.fasta"
+blastp_file_dir=r"code/4.core_genome_analysis/compare_with_closed_yeasts/output/blastp_vs_s288c_yeastsnonref_cov50_pid70_rep_seq/"
 geneList=[g.id for g in parse(pangenome_dir+pangenome,"fasta")]
-proteome_dir=r"data/genome/343_yeast_genomes/"
+proteome_dir=r"data/genome/yeast_species/pep/"
 
 
 geneMatrix,cnvMatrix=build_geneMatrix(strainList=strainList,
@@ -106,8 +106,8 @@ geneMatrix,cnvMatrix=build_geneMatrix(strainList=strainList,
                             cov_cutoff=0.5,
                             pid_cutoff=0.7)
 
-geneMatrix.to_csv("code/4.pan-genome_analysis/compare_with_closed_yeasts/output/7yeasts_nonref_blastp_50_70_geneMatrix.csv")
-cnvMatrix.to_csv("code/4.pan-genome_analysis/compare_with_closed_yeasts/output/7yeasts_nonref_blastp_50_70_cnvMatrix.csv")
+geneMatrix.to_csv("code/4.core_genome_analysis/compare_with_closed_yeasts/output/yeasts_blastp_50_70_geneMatrix.csv")
+cnvMatrix.to_csv("code/4.core_genome_analysis/compare_with_closed_yeasts/output/yeasts_blastp_50_70_cnvMatrix.csv")
 
 # check gene_ratio
 gene_ratio=geneMatrix.sum(axis=1)/geneMatrix.shape[1]
