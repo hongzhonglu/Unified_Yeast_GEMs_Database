@@ -32,14 +32,14 @@ def add_ethanol_soft_constraint(model,ethanol_yield_lb,ethanol='r_1761',gluc_upt
 os.chdir(r'D:\code\github\Unified_Yeast_GEMs_Database')
 
 # set output directory
-output_dir=r'code/6.transcriptomics_ssGEMs_analysis/RIPTiDe_integrate_transcriptome/output/'
+output_dir=r'code/7.human_diary_ethanol_analysis/output/'
 # check if the output directory exists
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
 # ethanol_lb=5
-ethanol_yield_lb=0.25 # g/g glucose
-growth_scale=0.2
+ethanol_yield_lb=0.18 # g/g glucose
+growth_scale=0.7
 
 def get_relative_growth(pow=None):
     # load growth data
@@ -88,7 +88,7 @@ relative_growth,max_growth_index=get_relative_growth(pow=growth_scale)
 df_expressions=pd.read_csv('code/6.transcriptomics_ssGEMs_analysis/output/sce969_transcriptome_tpmMatrix.csv',index_col=0)
 
 # load strain list
-ssGEM_dir = 'model/pan1800_ssGEMs'
+ssGEM_dir = 'model/ssGEMs'
 df_strain_info = pd.read_excel('data/1897_strains_info.xlsx', index_col=0)
 wildtypelist = ['14. CHNIII ', '20. CHN V ', '15. CHNII ', '17. Taiwanese ', '24. Asian islands ',
                 '18. Far East Asia ', '19. Malaysian ', '22. Far East Russian ']
@@ -171,7 +171,7 @@ for strainName in strainList:
     # ethanol = 'r_1761'
     # model.reactions.get_by_id(ethanol).lower_bound = ethanol_lb
     # Set ethanol soft constraint make sure the ethanol product is activated. We hypothesis that all strains' ethanol yield are more than 0.25 g/g glucose
-    model= add_ethanol_soft_constraint(model,ethanol_yield_lb=0.25)
+    model= add_ethanol_soft_constraint(model,ethanol_yield_lb=ethanol_yield_lb)
 
     # run RIPTiDe
     riptide_object = riptide.contextualize(model=model, transcriptome=transcript_abundances, fraction=relative_growth_rate,
@@ -219,3 +219,4 @@ df_concordance.to_csv(os.path.join(output_dir,f'humandairy_riptide_growth{growth
 # ethanol='r_1761'
 # df_mean_fluxes.loc[ethanol,:].describe()
 # df_median_fluxes.loc[ethanol,:].describe()
+
