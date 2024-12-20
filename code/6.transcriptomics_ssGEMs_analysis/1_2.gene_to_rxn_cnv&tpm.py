@@ -72,7 +72,7 @@ df_rxn_cnvMatrix.to_csv('code/6.transcriptomics_ssGEMs_analysis/output/sce1800_r
 
 # get rxn_tpmMatrix for each strain according to geneMatrix and GPR rules
 # load tpm data
-tpmMatrix=pd.read_csv('code/6.transcriptomics_ssGEMs_analysis/output/sce969_transcriptome_countMatrix_normalized.csv',index_col=0)
+tpmMatrix=pd.read_csv('code/6.transcriptomics_ssGEMs_analysis/output/sce969_transcriptome_tpmMatrix.csv',index_col=0)
 # calculate rxn_tpmMatrix
 df_rxn_tpmMatrix=pd.DataFrame(index=tpmMatrix.columns)
 for rxn in panYeast.reactions:
@@ -85,7 +85,7 @@ df_rxn_tpmMatrix=df_rxn_tpmMatrix.T
 df_rxn_tpmMatrix.fillna(0,inplace=True)
 
 # save rxn_tpmMatrix
-df_rxn_tpmMatrix.to_csv('code/6.transcriptomics_ssGEMs_analysis/output/sce969_rxn_expressionMatrix_normalized.csv')
+df_rxn_tpmMatrix.to_csv('code/6.transcriptomics_ssGEMs_analysis/output/sce969_rxn_tpmMatrix.csv')
 
 
 
