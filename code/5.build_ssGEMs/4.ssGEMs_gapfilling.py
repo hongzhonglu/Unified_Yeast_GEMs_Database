@@ -47,12 +47,12 @@ def strains_gapfilling(template_model,ssGEM_dir,strain_list=list()):
 # time.sleep(5*60*60)
 
 panYeast=read_sbml_model("model/panYeast.xml")
-ssGEM_dir="model/pan1800_ssGEMs/"
-df_ssGEMs_simulate=pd.read_csv("result/model_simulation/df_ssGEMs_size.csv",index_col=0)
+ssGEM_dir=r"E:\data\sce_paper\pan1011_ssGEMs/"
+df_ssGEMs_simulate=pd.read_csv("result/model_simulation/df_pan1011_ssGEMs_size.csv",index_col=0)
 gapfill_strainList=df_ssGEMs_simulate[~(df_ssGEMs_simulate["aerobic_growth"]>0.04)].index.tolist()
 # gapfill_strainList=os.listdir(ssGEM_dir)
 # add .xml suffix
-gapfill_strainList=[i+".xml" for i in gapfill_strainList]
+# gapfill_strainList=[i+".xml" for i in gapfill_strainList]
 gapf_failed_strainList,gapf_solutions=strains_gapfilling(template_model=panYeast,
                                                          ssGEM_dir=ssGEM_dir,
                                                          strain_list=gapfill_strainList)
@@ -60,11 +60,11 @@ gapf_failed_strainList,gapf_solutions=strains_gapfilling(template_model=panYeast
 # save result
 import json
 
-with open("code/5.build_ssGEMs/output/pan1800_gapfilling_solutions.json","w") as f:
+with open("code/5.build_ssGEMs/output/pan1011_gapfilling_solutions.json","w") as f:
     json.dump(gapf_solutions,f)
 
 # save failed strain list
-with open("code/5.build_ssGEMs/output/pan1800_gapfill_failed_strainList.json","w") as f:
+with open("code/5.build_ssGEMs/output/pan1011_gapfill_failed_strainList.json","w") as f:
     json.dump(gapf_failed_strainList,f)
 
 

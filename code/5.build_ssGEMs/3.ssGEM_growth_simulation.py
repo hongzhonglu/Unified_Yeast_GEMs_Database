@@ -37,18 +37,19 @@ def ssGEM_simulation(strain,file_path):
             ,anaerobic_growth[0],anaerobic_growth[1]]
     return result
 
-# sleep 2 hours
 # if __name__ == '__main__':
-ssGEM_dir="model/pan1800_ssGEMs/"
+# ssGEM_dir="model/ssGEMs/"
+ssGEM_dir=r"E:\data\sce_paper\pan1011_ssGEMs/"
 strains_list=os.listdir(ssGEM_dir)
 col=['gene_numb','rxn_numb','aerobic_growth','aerobic_rxns','anaerobic_growth','anaerobic_rxns']
 # pool=multiprocessing.Pool(processes=1)
 ssGEMs_eval={}
-for strain in strains_list:
+for strain in tqdm(strains_list):
     ssGEMs_eval[strain]=ssGEM_simulation(strain,ssGEM_dir)
 ssGEM_simulation_result=pd.DataFrame(ssGEMs_eval,index=col).T
-len(ssGEM_simulation_result[ssGEM_simulation_result['aerobic_growth']>0.04])
-ssGEM_simulation_result.to_csv(r"result/model_simulation/df_ssGEMs_size.csv")
+len(ssGEM_simulation_result[ssGEM_simulation_result['aerobic_growth']>0.01])
+ssGEM_simulation_result.to_csv(r"result/model_simulation/df_pan1011_ssGEMs_size.csv")
 
+ssGEM_simulation_result['rxn_numb'].describe()
 
 

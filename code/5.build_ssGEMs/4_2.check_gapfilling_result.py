@@ -20,7 +20,7 @@ gapfilling_unsolved=[x.strip('.xml') for x in pan1800_gapfilling_failed_strainLi
 
 # load all strains information
 all_strain_info=pd.read_excel(r'data\1897_strains_info.xlsx',index_col=0)
-gapfilling_unsolved_info=all_strain_info[all_strain_info['genome_id'].isin(gapfilling_unsolved)]
+gapfilling_unsolved_info=all_strain_info[all_strain_info.index.isin(gapfilling_unsolved)]
 
 
 # 1. check the unsolved strains
@@ -71,6 +71,16 @@ for i in range(3):
 plt.tight_layout()
 plt.show()
 
+# check number of rxns in gapfilling solutions
+gapsol_rxnnumbs={}
+for strain in pan1800_gapfilling_sol:
+    gapsol_rxnnumbs[strain]=len(pan1800_gapfilling_sol[strain])
+df_count=pd.Series(gapsol_rxnnumbs).value_counts()
+# plot the barplot
+plt.bar(df_count.index,df_count)
+plt.show()
+# save df_count
+
 
 # check the gapfilling solutions
 def count_rxns_in_sol(sol_dict):
@@ -101,3 +111,11 @@ df_gapfilling_rxn_count.rename(columns={0:'strain number'},inplace=True)
 
 # save result
 df_gapfilling_rxn_count.to_csv(r'code/5.build_ssGEMs/output/gapfilling_rxn_information.csv')
+
+
+# check the strain that lost r_1838
+r_1838_lost_strainList=[]
+for strain,list in pan1800_gapfilling_sol.items():
+    if 'r_1838' in list:
+        r_1838_lost_strainList.append(strain.rstrip('.xml'))
+df_r1838_lost_strain=all_strain_info[all_strain_info.index.isin(r_1838_lost_strainList)]

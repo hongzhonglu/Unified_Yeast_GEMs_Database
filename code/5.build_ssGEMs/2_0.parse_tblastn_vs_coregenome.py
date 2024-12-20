@@ -52,7 +52,7 @@ def build_tblastn_geneMatrix(strainList,geneList,pangenome,tblastn_file_dir,cov_
     """
     cnvMatrix=pd.DataFrame(index=geneList,columns=strainList)
     for strain in tqdm(strainList):
-        tblastn_file=parse_tblastn_result(tblastn_file=pangenome.strip('.fasta')+"_vs_"+strain.strip('.fna')+"_tblastn.txt",
+        tblastn_file=parse_tblastn_result(tblastn_file=pangenome+"_vs_"+strain+"_tblastn.txt",
                                           tblastn_dir=tblastn_file_dir,
                                           query=pangenome,
                                           query_dir="data/genome/")
@@ -77,24 +77,24 @@ def build_tblastn_geneMatrix(strainList,geneList,pangenome,tblastn_file_dir,cov_
 df_nacore100=pd.read_excel("result/na1011_coregene.xlsx",index_col=0)
 nacore100_geneList=df_nacore100[df_nacore100["core100"]==1].index.tolist()
 
-panYeast_geneList=[g.id for g in read_sbml_model('model/panYeast_v4_5.xml').genes]
+panYeast_geneList=[g.id for g in read_sbml_model('model/panYeast.xml').genes]
 nacore100_panYeast_genes=[g for g in nacore100_geneList if g in panYeast_geneList]
 
 etc_rxnList=['r_0226','r_0438','r_0439']
-etc_geneList=[g.id for r in etc_rxnList for g in read_sbml_model('model/panYeast_v4_5.xml').reactions.get_by_id(r).genes]
+etc_geneList=[g.id for r in etc_rxnList for g in read_sbml_model('model/panYeast.xml').reactions.get_by_id(r).genes]
 etc_geneList=list(set(etc_geneList))
 
 strainList=os.listdir(r"E:\data\sce_ssGEMs\genomes\assembled_sequence\1900_assembled_genome")
-tblastn_dir=r"code/3.pan-genome_construction/2.build_geneMatrix/tblastn_geneMatrix/output/S288c_R64_tblastn_vs_1800/"
+tblastn_dir=r"code/3.pan-genome_construction/2.build_geneMatrix/output/S288c_R64_tblastn_vs_1800/"
 pangenome="S288c_R64.fasta"
 
 all_strain_info=pd.read_excel("data/1897_strains_info.xlsx", index_col=0)
-kept_strainList=all_strain_info[all_strain_info["remove"]==False]["genome_id"].tolist()
+kept_strainList=all_strain_info[all_strain_info["remove"]==False].index.tolist()
 kept_strainList.append('s288c_R64')
 kept_strainList=[s+".fna" for s in kept_strainList]
 strainList=[s for s in strainList if s in kept_strainList]
 # remove _Saccharomyces_cerevisiae_ in strain name to shorten the strain name
-strainList=[s.replace("_Saccharomyces_cerevisiae_","_") for s in strainList]
+# strainList=[s.replace("_Saccharomyces_cerevisiae_","_") for s in strainList]
 # remove _genomic_
 # strainList=[s.replace("_genomic","") for s in strainList]
 tblastn_geneMatrix,tblastn_cnvMatrix=build_tblastn_geneMatrix(strainList=strainList,
@@ -129,8 +129,8 @@ len(tblastn_geneMatrix.index.unique())
 tblastn_geneMatrix=tblastn_geneMatrix[~tblastn_geneMatrix.index.duplicated(keep='first')]
 tblastn_cnvMatrix=tblastn_cnvMatrix[~tblastn_cnvMatrix.index.duplicated(keep='first')]
 
-tblastn_cnvMatrix.to_csv("code/5.build_ssGEMs/output/coregene_tblastn4_cnvMatrix.csv")
-tblastn_geneMatrix.to_csv("code/5.build_ssGEMs/output/coregene_tblastn4_geneMatrix.csv")
+tblastn_cnvMatrix.to_csv("code/5.build_ssGEMs/output/coregene_tblastn_cnvMatrix.csv")
+tblastn_geneMatrix.to_csv("code/5.build_ssGEMs/output/coregene_tblastn_geneMatrix.csv")
 
 check_geneList=['YFL058W','YGL012W','YHR020W','YNL247W','YPL160W','YDL141W','YML126C','YAR015W','YDR354W','YFR025C','YIL020C','YHR072W','YLL018C']
 gene_ratio=tblastn_geneMatrix.sum(axis=1)/len(strainList)
