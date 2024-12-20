@@ -3,7 +3,7 @@
 # author : wangh
 # file : 2.parse_functional_annotation_find_new_rxns.py
 # project : Unified_Yeast_GEMs_Database
-'''combine eggnog and kegg functional annotation result to find potential new reactions to update panYeast
+'''combine eggnog and kegg functional annotation result to find potential new reactions to update panYeast.
 '''
 import pandas as pd
 from Bio import SeqIO
@@ -19,9 +19,17 @@ df_eggnog=pd.read_excel(r"data/genome/pan1900_new_v4_50_70_functional_annotation
 df_eggnog_add=df_eggnog[~df_eggnog.index.isin(already_geneList)]
 
 # load kegg annotation.and set koID as column
-df_kegg=pd.read_excel(r"data/genome/pan1900_new_v4_50_70_KEGG_functional_annotations.xlsx",index_col=0)
+df_kegg=pd.read_excel(r"data/genome/sce-pan1807_KEGG_functional_annotations.xlsx",index_col=0)
 df_kegg.dropna(inplace=True)
 df_kegg_add=df_kegg[~df_kegg.index.isin(already_geneList)]
+
+# load uniprot annotation
+df_uniprot=pd.read_excel(r"data/genome/scepan1807_functional_annotation_uniprot.xlsx",index_col=0)
+# fill nan as "nan" in Taxonomic lineage
+df_uniprot['Taxonomic lineage']=df_uniprot['Taxonomic lineage'].fillna("nan")
+df_uniprot=df_uniprot[(df_uniprot['similarity']>0.5) & (~df_uniprot['EC number'].isnull()) & df_uniprot['Taxonomic lineage'].str.contains('Saccharomycetales')]
+
+df_uniprot_add=df_uniprot[~df_uniprot.index.isin(already_geneList)]
 
 # combine eggnog and kegg annotation result to add geneList:
 df_eggnog_add_ko=df_eggnog_add['KEGG_ko'].to_frame()
