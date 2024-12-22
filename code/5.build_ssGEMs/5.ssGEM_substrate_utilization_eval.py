@@ -16,7 +16,7 @@ from cobra.flux_analysis import gapfill
 
 panmodel=read_sbml_model("model/panYeast.xml")
 # test_strains
-ssGEM_dir="model/pan1800_ssGEMs/"
+ssGEM_dir="model/ssGEMs/"
 test_strains=["GCA_019394525.1_ASM1939452v1_genomic.xml","GCA_019394085.1_ASM1939408v1_genomic.xml","GCA_019394815.1_ASM1939481v1_genomic.xml"]
 for strain in test_strains:
     model=read_sbml_model(ssGEM_dir+strain)
@@ -40,7 +40,7 @@ carbob_IDlist=carbon_sources_0['panID'].values.tolist()
 
 # predict different carbon source utilization capacity
 growth_simulation=pd.DataFrame(index=carbon_sources)
-model=read_sbml_model("model/yeastGEM.xml")
+model=read_sbml_model("model/yeast-GEM.xml")
 growth_values=[]
 print(model.slim_optimize())
 for carbon in carbob_IDlist:
@@ -97,12 +97,14 @@ growthMatrix=growthMatrix[growthMatrix["Carbon source"].isin(carbon_sources)]
 growthMatrix.set_index(keys="Carbon source",inplace=True)
 # build simulation growthMatrix
 simul_growthMatrix=growth_simulation
-simu_columns=["yeastGEM_s288c","ethanol_red","s288c","CEN.PK"]
+simu_columns=["yeastGEM","ethanol_red","s288c","CEN.PK"]
 simul_growthMatrix.columns=simu_columns
 for column in simu_columns:
     simul_growthMatrix.loc[simul_growthMatrix[column]<=0.01,column]=0
     simul_growthMatrix.loc[simul_growthMatrix[column]>0.01,column]=1
-simul_growthMatrix.fillna(0,inplace=True)
+# simul_growthMatrix.fillna(0,inplace=True)
+# simul_growthMatrix.loc[simul_growthMatrix['yeastGEM']>0.01,'yeastGEM']=1
+# simul_growthMatrix.loc[simul_growthMatrix['yeastGEM']<=0.01,'yeastGEM']=0
 
 # save simulation growthMatrix and experiment growthMatrix into one excel
 writer=pd.ExcelWriter("result/model_simulation/61substrate_prediction.xlsx")
@@ -129,8 +131,8 @@ for strain in columns:
     ssGEM_accuracy=cal_accuracy(exp_data=growthMatrix,sim_data=simul_growthMatrix,exp_column=strain,sim_column=strain)
     accuracy_result[strain]=ssGEM_accuracy
 
-yeast8_accuracy=cal_accuracy(exp_data=growthMatrix,sim_data=simul_growthMatrix,exp_column="s288c",sim_column="yeastGEM_s288c")
-accuracy_result["yeastGEM"]=yeast8_accuracy
+yeast9_accuracy=cal_accuracy(exp_data=growthMatrix,sim_data=simul_growthMatrix,exp_column="s288c",sim_column="yeastGEM")
+accuracy_result["yeastGEM"]=yeast9_accuracy
 
 df_accuracy_result=pd.DataFrame.from_dict(accuracy_result,orient="index",columns=cols)
 # remove s288c row
@@ -169,6 +171,7 @@ yeastGEM_score=cal_F1score(TP=df_accuracy_result.loc["yeastGEM","TF"],
                         FP=df_accuracy_result.loc["yeastGEM","FP"],
                         FN=df_accuracy_result.loc["yeastGEM","FN"],
                         TN=df_accuracy_result.loc["yeastGEM","TN"])
+yeastGEM_score=cal_F1score(TP=yeast9_accuracy[0],FP=yeast9_accuracy[1],FN=yeast9_accuracy[2],TN=yeast9_accuracy[3])
 df_score=pd.DataFrame([ssGEM_score,cenpk_score,ethanolred_score,yeastGEM_score],index=["ssGEMs(CEN.PK&ethanol red)","CEN_PK","Ethanol red","yeastGEM"],columns=["F1 score","Accuracy","Precision","Sensitivity","Specificity"])
 
 # save df_score in another sheet of ssGEM_substrates_prediction_result.xlsx

@@ -18,7 +18,7 @@ os.chdir(r'D:\code\github\Unified_Yeast_GEMs_Database')
 configuration= cobra.Configuration()
 configuration.solver = 'gurobi'
 
-growth_scale=0.5
+growth_scale=1.4
 
 def get_relative_growth(pow=None):
     # load growth data
@@ -32,17 +32,17 @@ def get_relative_growth(pow=None):
 
     # find max growth rate index
     # option 1: select the max growth rate as reference
-    # max_growth_index = exp_growth.idxmax()
-    # print('The fastest growing strain is %s' % max_growth_index)
-    # # transform the growth rate to relative growth rate
-    # relative_growth = exp_growth / exp_growth[max_growth_index]
+    max_growth_index = exp_growth.idxmax()
+    print('The fastest growing strain is %s' % max_growth_index)
+    # transform the growth rate to relative growth rate
+    relative_growth = exp_growth / exp_growth[max_growth_index]
 
     # option 2: select the mean of the top 5% growth rate as reference
-    max_growth_index=exp_growth.nlargest(int(len(exp_growth)*0.05)).index.tolist()
-    max_growth=exp_growth.loc[max_growth_index].mean()
-    relative_growth=exp_growth/max_growth
-    # if relative_growth>1, set it as 1
-    relative_growth[relative_growth>1]=1
+    # max_growth_index=exp_growth.nlargest(int(len(exp_growth)*0.05)).index.tolist()
+    # max_growth=exp_growth.loc[max_growth_index].mean()
+    # relative_growth=exp_growth/max_growth
+    # # if relative_growth>1, set it as 1
+    # relative_growth[relative_growth>1]=1
 
     if pow:
         # normalize the relative growth rate more close to 1 by power transformation
@@ -56,10 +56,24 @@ def ssGEM_sampling(model,process,n):
                       method='achr',
                       thinning=10,
                       processes=process)
-    mean_fluxes=sample_sol.mean(axis=0)
 
-    return mean_fluxes
+    # mean_fluxes=sample_sol.mean(axis=0)
+    median_fluxes=sample_sol.median(axis=0)
 
+    return median_fluxes
+
+def set_bounds(model,ref_moodel):
+    for rxn in model.reactions:
+        id=rxn.id
+        ref_bounds=ref_moodel.reactions.get_by_id(id).bounds
+        model.reactions.get_by_id(id).bounds=ref_bounds
+    return model
+
+def close_inactivate_rxn(model,active_rxnList):
+    for rxn in model.reactions:
+        if rxn.id not in active_rxnList:
+            model.reactions.get_by_id(rxn.id).bounds=0,0
+        return model
 
 if __name__ == '__main__':
 
@@ -71,12 +85,17 @@ if __name__ == '__main__':
     # ref_growth=ref_fluxes['r_2111']
     ref_growth=ref_model.slim_optimize()
 
+    ref_fluxes=pfba(model, fraction_of_optimum=0.999).fluxes
+    active_rxnList=(ref_fluxes[ref_fluxes>0.00001].index.tolist())
+
     rxnList=[r.id for r in ref_model.reactions]
 
     # load the relative growth rate data
     relative_growth,max_growth_index=get_relative_growth(pow=growth_scale)
 
-    ssGEM_dir='code/6.transcriptomics_ssGEMs_analysis/2.GIMME_buildmodel/output/gimme_ssGEMs_shrinked'
+    ssGEM_dir='code/6.transcriptomics_ssGEMs_analysis/output/GIMME_0.9_ssGEMs'
+    # ssGEM_dir = r'E:\data\Unified_Yeast_GEMs_Database\code\6.transcriptomics_ssGEMs_analysis\2.GIMME_buildmodel\output\gimme_ssGEMs_shrinked'
+
 
     strainList=os.listdir(ssGEM_dir)
     strainList=[strain for strain in strainList if strain.replace('.xml','') in relative_growth.index]
@@ -90,6 +109,10 @@ if __name__ == '__main__':
             print('The ssGEM of {} is not exist!'.format(strain))
             continue
         model = read_sbml_model(os.path.join(ssGEM_dir, strain))
+
+        # reset the bounds for tinit model
+        if 'tinit' in ssGEM_dir:
+            model=set_bounds(model,ref_model)
 
         # 1. set medium
         model = set_SCmedium(model)
@@ -115,6 +138,7 @@ if __name__ == '__main__':
         tol_ratio=0.01
         model.reactions.get_by_id('r_2111').bounds=gr_strain*(1-tol_ratio),gr_strain
 
+        model=close_inactivate_rxn(model,active_rxnList)
 
         # 3. pFBA simulation: minimize glucose uptake rate
         # objective: minimize glucose uptake rate
@@ -126,7 +150,8 @@ if __name__ == '__main__':
             # run FBA
             solution = model.optimize()
             # pfba
-            # solution = pfba(model, fraction_of_optimum=1.05)
+            # with model:
+            #     solution = pfba(model, fraction_of_optimum=1.001)
             fluxes = solution.fluxes
             # sample
             # fluxes=ssGEM_sampling(model,process=1,n=20)
@@ -140,8 +165,9 @@ if __name__ == '__main__':
     # fill nan with 0
     df_flux.fillna(0,inplace=True)
     # save fluxes
-    # df_flux.to_csv('code/6.transcriptomics_ssGEMs_analysis/output/fix_growth_gimme_pfba_fluxes_shrinked.csv')
+    # df_flux.to_csv(f'code/6.transcriptomics_ssGEMs_analysis/output/fix_growth{growth_scale}_gimme_pfba_fluxes_shrinked.csv')
     df_flux.to_csv(f'code/6.transcriptomics_ssGEMs_analysis/output/fix_growth{growth_scale}_gimme_fba_fluxes_shrinked.csv')
+    # df_flux.to_csv(f'code/6.transcriptomics_ssGEMs_analysis/output/fix_growth{growth_scale}_tinit_fba_fluxes_shrinked.csv')
     # df_flux.to_csv('code/6.transcriptomics_ssGEMs_analysis/output/fix_growth_gimme_sample_fluxes.csv')
 
 

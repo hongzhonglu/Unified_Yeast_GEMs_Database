@@ -17,4 +17,12 @@ mmseqs easy-search /mnt/d/code/github/Unified_Yeast_GEMs_Database_from_13pro/Uni
 #blastp: pan1800_v2_50_70 vs lgpangenome
 mmseqs easy-search /mnt/d/code/github/Unified_Yeast_GEMs_Database_from_13pro/Unified_Yeast_GEMs_Database/data/genome/pan1800_50_70_v2.fasta /mnt/d/code/github/Unified_Yeast_GEMs_Database_from_13pro/Unified_Yeast_GEMs_Database/data/genome/lg_pangenome.fasta /mnt/d/code/github/Unified_Yeast_GEMs_Database_from_13pro/Unified_Yeast_GEMs_Database/code/3.pan-genome_construction/3.pan-genome_comparison/output/pan1800_v2_vs_lgpan_blastp.txt tmp --min-seq-id 0.6 -e 1e-5
 
+# bbh: Sce-pan1011 vs Sce-pan1011
+mmseqs easy-search data/genome/na_pan1011.fasta data/genome/na_pan1011.fasta code/3.pan-genome_construction/3.pan-genome_comparison/output/pan1011_vs_pan1011_blastp.txt tmp --min-seq-id 0.6 -e 1e-5
+
+# blastp: Sce-pan1807 vs Sce-pan1807
+mmseqs easy-search data/genome/pan1800.fasta data/genome/pan1800.fasta code/3.pan-genome_construction/3.pan-genome_comparison/output/pan1800_vs_pan1800_blastp.txt tmp --min-seq-id 0.6 -e 1e-5
+
+# blastp: Sce-pan1011 vs Sce-pan1807
+mmseqs easy-search data/genome/na_pan1011.fasta data/genome/pan1800.fasta code/3.pan-genome_construction/3.pan-genome_comparison/output/pan1011_vs_pan1800_blastp.txt tmp --min-seq-id 0.5 -e 1e-5
 
